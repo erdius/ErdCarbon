@@ -29,12 +29,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.runtime.mutableIntStateOf
 import com.github.gezimos.inkos.MainViewModel
 import com.github.gezimos.inkos.R
@@ -58,19 +54,9 @@ fun ColorEditorUI(
     val dialogManager = remember { ComposeDialogManager(context, context as? android.app.Activity ?: throw Exception("Invalid Activity")) }
     val titleFontSize = if (fontSize != androidx.compose.ui.unit.TextUnit.Unspecified) (fontSize.value * 1.5).sp else fontSize
 
-    var isDpadMode by remember { mutableStateOf(false) }
-
-    // DPAD state for color editor
-    val ceZone = remember { mutableStateOf(ColorEditorFocusZone.TABS) }
-    val ceHeaderIndex = remember { mutableIntStateOf(0) }
     val ceTabIndex = remember { mutableIntStateOf(0) }
     val ceColorRowIndex = remember { mutableIntStateOf(0) }
     val ceColorRowClickAction = remember { mutableStateOf<((Int) -> Unit)?>(null) }
-    val outerFocusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(200)
-        try { outerFocusRequester.requestFocus() } catch (_: Exception) {}
-    }
 
     var customLightTextColor by remember { mutableStateOf(prefs.customThemeLightTextColor) }
     var customLightBackgroundColor by remember { mutableStateOf(prefs.customThemeLightBackgroundColor) }
@@ -108,29 +94,13 @@ fun ColorEditorUI(
         val screenScale = rememberScreenScale()
         val prefTextColor = Theme.colors.text
         val prefBackgroundColor = Theme.colors.background
-        val backHighlighted = isDpadMode && ceZone.value == ColorEditorFocusZone.HEADER && ceHeaderIndex.intValue == 0
-        val saveHighlighted = isDpadMode && ceZone.value == ColorEditorFocusZone.HEADER && ceHeaderIndex.intValue == 1
+        val backHighlighted = false
+        val saveHighlighted = false
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(prefBackgroundColor)
-                .focusRequester(outerFocusRequester)
-                .focusable()
-                .onPreviewKeyEvent { event ->
-                    NavHelper.handleColorEditorKeyEvent(
-                        keyEvent = event,
-                        isDpadModeSetter = { isDpadMode = it },
-                        focusZone = ceZone,
-                        headerIndex = ceHeaderIndex,
-                        tabIndex = ceTabIndex,
-                        colorRowIndex = ceColorRowIndex,
-                        onBackClick = onBackClick,
-                        onSave = { applyColors() },
-                        onTabSelect = {},
-                        onColorRowClick = { idx -> ceColorRowClickAction.value?.invoke(idx) }
-                    )
-                }
         ) {
             // Header with Save button
             SettingsComposable.PageHeader(
@@ -182,8 +152,6 @@ fun ColorEditorUI(
                     onLightBackgroundColorChange = { customLightBackgroundColor = it },
                     onDarkTextColorChange = { customDarkTextColor = it },
                     onDarkBackgroundColorChange = { customDarkBackgroundColor = it },
-                    isDpadMode = isDpadMode,
-                    focusZone = ceZone.value,
                     tabIndex = ceTabIndex.intValue,
                     colorRowIndex = ceColorRowIndex.intValue,
                     onColorRowClickAction = ceColorRowClickAction
@@ -209,12 +177,12 @@ fun CustomThemeCreator(
     onLightBackgroundColorChange: (Int) -> Unit,
     onDarkTextColorChange: (Int) -> Unit,
     onDarkBackgroundColorChange: (Int) -> Unit,
-    isDpadMode: Boolean = false,
-    focusZone: ColorEditorFocusZone = ColorEditorFocusZone.TABS,
     tabIndex: Int = 0,
     colorRowIndex: Int = 0,
     onColorRowClickAction: androidx.compose.runtime.MutableState<((Int) -> Unit)?>? = null
 ) {
+    // Physical d-pad focus is not applicable on the touch-only Mudita Kompakt.
+    val isDpadMode = false
     val context = LocalContext.current
     val screenScale = rememberScreenScale()
     var editingLightTheme by remember { mutableStateOf(true) }
@@ -270,8 +238,8 @@ fun CustomThemeCreator(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp.scaled(screenScale))
         ) {
-            val lightTabHighlighted = isDpadMode && focusZone == ColorEditorFocusZone.TABS && tabIndex == 0
-            val darkTabHighlighted = isDpadMode && focusZone == ColorEditorFocusZone.TABS && tabIndex == 1
+            val lightTabHighlighted = false && tabIndex == 0
+            val darkTabHighlighted = false && tabIndex == 1
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -388,8 +356,8 @@ fun CustomThemeCreator(
         }
 
         // Color picker rows
-        val bgRowHighlighted = isDpadMode && focusZone == ColorEditorFocusZone.COLOR_ROWS && colorRowIndex == 0
-        val textRowHighlighted = isDpadMode && focusZone == ColorEditorFocusZone.COLOR_ROWS && colorRowIndex == 1
+        val bgRowHighlighted = false && colorRowIndex == 0
+        val textRowHighlighted = false && colorRowIndex == 1
         Row(
             modifier = Modifier
                 .fillMaxWidth()

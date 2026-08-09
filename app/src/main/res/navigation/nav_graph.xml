@@ -19,12 +19,6 @@
             android:id="@+id/action_mainFragment_to_recentsFragment"
             app:destination="@id/recentsFragment" />
         <action
-            android:id="@+id/action_mainFragment_to_simpleTrayFragment"
-            app:destination="@id/simpleTrayFragment" />
-        <action
-            android:id="@+id/action_mainFragment_to_hubFragment"
-            app:destination="@id/hubFragment" />
-        <action
             android:id="@+id/action_mainFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
     </fragment>
@@ -76,16 +70,6 @@
         android:id="@+id/recentsFragment"
         android:name="com.github.gezimos.inkos.ui.RecentsFragment"
         android:label="RecentsFragment" />
-
-    <fragment
-        android:id="@+id/simpleTrayFragment"
-        android:name="com.github.gezimos.inkos.ui.notifications.SimpleTrayFragment"
-        android:label="SimpleTrayFragment" />
-
-    <fragment
-        android:id="@+id/hubFragment"
-        android:name="com.github.gezimos.inkos.ui.notifications.HubFragment"
-        android:label="HubFragment" />
 
     <fragment
         android:id="@+id/settingsFragment"

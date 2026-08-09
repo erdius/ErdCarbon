@@ -67,10 +67,6 @@ fun AZSidebar(
     onTouchStart: (() -> Unit)? = null,
     /** Called when touch ends. Passes the final selected letter (or null when none). */
     onTouchEnd: ((String?) -> Unit)? = null,
-    /** DPAD navigation: external control of selected index */
-    dpadSelectedIndex: Int? = null,
-    /** DPAD navigation: callback when DPAD changes selection */
-    onDpadIndexChange: ((Int) -> Unit)? = null,
     /** Shape preference for the indicator (0=Pill, 1=Rounded, 2=Square) */
     textIslandsShape: Int = 0,
     /** Font family for the A–Z letters (uses app drawer font when provided). */
@@ -94,7 +90,7 @@ fun AZSidebar(
     LaunchedEffect(initialIdx) {
         internalSelectedIdx = initialIdx
     }
-    val selectedIdx = dpadSelectedIndex ?: internalSelectedIdx
+    val selectedIdx = internalSelectedIdx
     val density = LocalDensity.current
     val screenScale = rememberScreenScale()
     val indicatorHeight = 20.dp.scaled(screenScale)

@@ -67,7 +67,6 @@ import com.github.gezimos.inkos.style.scaled
 import com.github.gezimos.inkos.ui.compose.AZSidebar
 import com.github.gezimos.inkos.ui.compose.AppsDrawerLayout
 import com.github.gezimos.inkos.ui.compose.EditModeOverlay
-import com.github.gezimos.inkos.ui.compose.NavHelper
 import com.github.gezimos.inkos.helper.SearchHelper
 import com.github.gezimos.inkos.ui.compose.gestureHelper
 import com.github.gezimos.inkos.ui.dialogs.ComposeDialogManager
@@ -676,7 +675,6 @@ class AppsFragment : Fragment() {
                 val columnFocusRequester = remember { FocusRequester() }
                 val searchFocusRequester = remember { FocusRequester() }
                 val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
-                val keyPressTracker = remember { com.github.gezimos.inkos.ui.compose.KeyPressTracker() }
 
                 LaunchedEffect(state.searchQuery.text) {
                     if (state.searchQuery.text.isNotBlank() && state.searchEnabled) {
@@ -701,13 +699,8 @@ class AppsFragment : Fragment() {
                     } catch (_: Exception) {}
                 }
                 
-                LaunchedEffect(state.showRenameOverlay) {
-                    keyPressTracker.reset()
-                }
-                
                 LaunchedEffect(state.searchFocused) {
                     if (state.searchFocused) {
-                        state.isDpadMode = false
                         state.selectedItemIndex = -1
                         state.azFilterFocused = false
                     }
@@ -756,245 +749,10 @@ class AppsFragment : Fragment() {
                                         }
                                         if (state.searchFocused) {
                                             state.searchFocused = false
-                                            state.isDpadMode = true
                                             state.selectedItemIndex = 0
                                             columnFocusRequester.requestFocus()
                                             return@onPreviewKeyEvent true
                                         }
-                                    }
-
-                                    try {
-                                        val handled = NavHelper.handleAppsKeyEvent(
-                                            keyEvent = keyEvent,
-                                            keyPressTracker = keyPressTracker,
-                                            isDpadModeSetter = { v -> state.isDpadMode = v },
-                                            selectedIndexGetter = { state.selectedItemIndex },
-                                            selectedIndexSetter = { v ->
-                                                state.selectedItemIndex = v
-                                                state.dragHandleFocused = false
-                                            },
-                                            currentPage = state.currentPage,
-                                            totalPages = totalPages,
-                                            displayAppsSize = displayApps.size,
-                                            onPreviousPage = { previousPage() },
-                                            onNextPage = { nextPage() },
-                                            onAppClick = { index ->
-                                                val selectedApp = displayApps.getOrNull(index)
-                                                if (selectedApp != null) {
-                                                    handleAppClick(selectedApp)
-                                                }
-                                            },
-                                            onAppLongClick = { index ->
-                                                val selectedApp = displayApps.getOrNull(index)
-                                                if (selectedApp != null) {
-                                                    vibrateFeedback()
-                                                    when (flag) {
-                                                        Constants.AppDrawerFlag.SetHomeApp,
-                                                        Constants.AppDrawerFlag.SetSwipeLeft,
-                                                        Constants.AppDrawerFlag.SetSwipeRight,
-                                                        Constants.AppDrawerFlag.SetSwipeUp,
-                                                        Constants.AppDrawerFlag.SetSwipeDown,
-                                                        Constants.AppDrawerFlag.SetClickClock,
-                                                        Constants.AppDrawerFlag.SetClickDate,
-                                                        Constants.AppDrawerFlag.SetQuoteWidget,
-                                                        Constants.AppDrawerFlag.SetDoubleTap -> {
-                                                            viewModel.selectAppForFlag(selectedApp, flag, appPosition)
-                                                            findNavController().popBackStack()
-                                                        }
-                                                        else -> {
-                                                            dialogManager.showAppContextMenu(
-                                                                app = selectedApp,
-                                                                flag = flag,
-                                                                isLocked = viewModel.isAppLocked(selectedApp),
-                                                                onDelete = { handleAppDelete(it) },
-                                                                onRename = { pkg, newName ->
-                                                                    if (newName.isEmpty()) {
-                                                                        val parts = pkg.split("|", limit = 2)
-                                                                        val app = displayApps.find { it.activityPackage == parts[0] && (parts.size < 2 || it.shortcutId == parts[1]) }
-                                                                        if (app != null) {
-                                                                            state.renameApp = app
-                                                                            state.showRenameOverlay = true
-                                                                        }
-                                                                    } else {
-                                                                        val appToRename = state.renameApp
-                                                                        if (appToRename != null) handleRenameApp(appToRename, newName)
-                                                                        state.showRenameOverlay = false
-                                                                        state.renameApp = null
-                                                                    }
-                                                                },
-                                                                onHideShow = { f, app ->
-                                                                    handleHideShowApp(f, app)
-                                                                    if (f == Constants.AppDrawerFlag.HiddenApps && viewModel.getPrefs().hiddenApps.isEmpty()) {
-                                                                        findNavController().popBackStack()
-                                                                    }
-                                                                },
-                                                                onLock = { app -> handleLockApp(app) {} },
-                                                                onInfo = { app ->
-                                                                    handleInfoApp(app)
-                                                                    findNavController().popBackStack(R.id.mainFragment, false)
-                                                                }
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            onNavigateBack = { findNavController().popBackStack() },
-                                            showAzFilter = appsDrawer.appDrawerAzFilter && !state.showRenameOverlay && !state.isHiddenAppsMode && !state.isEditFavoritesMode && !state.isEditHiddenMode,
-                                            azFilterFocused = state.azFilterFocused,
-                                            onAzFilterFocusChange = { focused ->
-                                                state.azFilterFocused = focused
-                                                if (focused) {
-                                                    state.azFilterSelectedIndex = 0
-                                                }
-                                            },
-                                            azFilterSelectedIndex = state.azFilterSelectedIndex,
-                                            onAzFilterIndexChange = { index ->
-                                                state.azFilterSelectedIndex = index
-                                            },
-                                            azFilterSize = appsDrawer.azLetters.size,
-                                            onAzFilterActivate = {
-                                                val letter = appsDrawer.azLetters.getOrNull(state.azFilterSelectedIndex)?.toString()
-                                                if (letter != null) {
-                                                    try { com.github.gezimos.inkos.helper.utils.VibrationHelper.trigger(com.github.gezimos.inkos.helper.utils.VibrationHelper.Effect.SOFT) } catch (_: Exception) {}
-                                                    val newFilter = if (letter == "★") null else letter.firstOrNull()?.uppercaseChar()
-                                                    state.azFilterLetter = newFilter
-                                                    setCurrentPageSafe(0)
-                                                }
-                                            },
-                                            showSearch = state.searchEnabled && !state.isHiddenAppsMode,
-                                            onSearchFocus = {
-                                                state.searchFocused = true
-                                                try {
-                                                    searchFocusRequester.requestFocus()
-                                                    keyboardController?.show()
-                                                } catch (_: Exception) {}
-                                            },
-                                            // Selection-mode DPAD support (Edit Favorites / Edit Hidden Apps)
-                                            isEditFavoritesMode = state.isEditFavoritesMode || state.isEditHiddenMode,
-                                            allowDragReorder = state.isEditFavoritesMode,
-                                            titleFocusable = flag == Constants.AppDrawerFlag.HiddenApps,
-                                            hasDoneButton = state.isEditFavoritesMode || state.isEditHiddenMode,
-                                            doneFocused = state.doneFocused,
-                                            onDoneFocusChange = { focused ->
-                                                state.doneFocused = focused
-                                                if (focused) state.titleFocused = false
-                                            },
-                                            onDoneActivate = {
-                                                when {
-                                                    state.isEditHiddenMode -> {
-                                                        viewModel.saveEditHiddenApps(state.selectedHidden.toList())
-                                                        findNavController().popBackStack()
-                                                    }
-                                                    state.isEditFavoritesMode -> {
-                                                        viewModel.saveEditFavorites(state.selectedFavorites.toList())
-                                                        findNavController().popBackStack()
-                                                    }
-                                                }
-                                            },
-                                            titleFocused = state.titleFocused,
-                                            onTitleFocusChange = { focused ->
-                                                state.titleFocused = focused
-                                                if (focused) state.doneFocused = false
-                                            },
-                                            onTitleActivate = {
-                                                when (flag) {
-                                                    Constants.AppDrawerFlag.EditFavorites -> {
-                                                        EditModeHelper.showHomeAppsAndPagesOnly(requireContext(), this@AppsFragment, prefs) {
-                                                            maxFavoritesState = prefs.homeAppsNum
-                                                        }
-                                                    }
-                                                    Constants.AppDrawerFlag.HiddenApps -> {
-                                                        findNavController().navigate(
-                                                            R.id.appsFragment,
-                                                            androidx.core.os.bundleOf("flag" to Constants.AppDrawerFlag.EditHiddenApps.toString())
-                                                        )
-                                                    }
-                                                    else -> {}
-                                                }
-                                            },
-                                            onFavoriteToggle = if (state.isEditFavoritesMode || state.isEditHiddenMode) { { index ->
-                                                val app = displayApps.getOrNull(index)
-                                                if (app != null) {
-                                                    if (state.isEditHiddenMode) {
-                                                        val existingIndex = state.selectedHidden.indexOfFirst { it.activityPackage == app.activityPackage && it.activityClass == app.activityClass }
-                                                        if (existingIndex >= 0) state.selectedHidden.removeAt(existingIndex)
-                                                        else state.selectedHidden.add(app)
-                                                    } else {
-                                                        val existingIndex = state.selectedFavorites.indexOfFirst { it.activityPackage == app.activityPackage && it.activityClass == app.activityClass }
-                                                        if (existingIndex >= 0) {
-                                                            state.selectedFavorites.removeAt(existingIndex)
-                                                        } else if (state.selectedFavorites.size < prefs.homeAppsNum) {
-                                                            state.selectedFavorites.add(app)
-                                                        } else {
-                                                            Toast.makeText(requireContext(), getString(R.string.max_favorites_reached, prefs.homeAppsNum), Toast.LENGTH_SHORT).show()
-                                                        }
-                                                    }
-                                                }
-                                            } } else null,
-                                            // DPAD drag reorder
-                                            dragHandleFocused = state.dragHandleFocused,
-                                            onDragHandleFocusChange = { focused -> state.dragHandleFocused = focused },
-                                            dpadGrabbedIndex = state.dpadGrabbedIndex,
-                                            onDpadGrab = {
-                                                val app = displayApps.getOrNull(state.selectedItemIndex)
-                                                if (app != null) {
-                                                    val favIndex = state.selectedFavorites.indexOfFirst {
-                                                        it.activityPackage == app.activityPackage && it.activityClass == app.activityClass
-                                                    }
-                                                    if (favIndex >= 0) {
-                                                        state.dpadGrabbedIndex = favIndex
-                                                        state.draggingIndex = favIndex
-                                                    }
-                                                }
-                                            },
-                                            onDpadDrop = {
-                                                state.dpadGrabbedIndex = null
-                                                state.draggingIndex = null
-                                                state.dragOffsetY = 0f
-                                            },
-                                            onDpadMoveUp = {
-                                                val idx = state.dpadGrabbedIndex
-                                                if (idx != null && idx > 0) {
-                                                    val item = state.selectedFavorites.removeAt(idx)
-                                                    state.selectedFavorites.add(idx - 1, item)
-                                                    state.dpadGrabbedIndex = idx - 1
-                                                    state.draggingIndex = idx - 1
-                                                    state.dragOffsetY = 0f
-                                                    if (state.selectedItemIndex > 0) {
-                                                        state.selectedItemIndex = state.selectedItemIndex - 1
-                                                    }
-                                                }
-                                            },
-                                            onDpadMoveDown = {
-                                                val idx = state.dpadGrabbedIndex
-                                                if (idx != null && idx < state.selectedFavorites.size - 1) {
-                                                    val item = state.selectedFavorites.removeAt(idx)
-                                                    state.selectedFavorites.add(idx + 1, item)
-                                                    state.dpadGrabbedIndex = idx + 1
-                                                    state.draggingIndex = idx + 1
-                                                    state.dragOffsetY = 0f
-                                                    if (state.selectedItemIndex < displayApps.size - 1) {
-                                                        state.selectedItemIndex = state.selectedItemIndex + 1
-                                                    }
-                                                }
-                                            },
-                                            isItemChecked = if (state.isEditFavoritesMode || state.isEditHiddenMode) { { index ->
-                                                val app = displayApps.getOrNull(index)
-                                                val targetList = if (state.isEditHiddenMode) state.selectedHidden else state.selectedFavorites
-                                                app != null && targetList.any {
-                                                    it.activityPackage == app.activityPackage && it.activityClass == app.activityClass
-                                                }
-                                            } } else null
-                                        )
-                                        if (handled) return@onPreviewKeyEvent true
-                                    } catch (_: Exception) {}
-                                    
-                                    if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionDown && state.searchFocused) {
-                                        state.searchFocused = false
-                                        state.isDpadMode = true
-                                        state.selectedItemIndex = 0
-                                        columnFocusRequester.requestFocus()
-                                        return@onPreviewKeyEvent true
                                     }
 
                                     if (keyEvent.type == KeyEventType.KeyDown) {
@@ -1074,7 +832,6 @@ class AppsFragment : Fragment() {
                                 searchFocusRequester = searchFocusRequester,
                                 onAppClick = { app ->
                                     state.selectedItemIndex = displayApps.indexOf(app)
-                                    state.isDpadMode = false
                                     handleAppClick(app)
                                 },
                                 onAppLongClick = { app ->
@@ -1082,7 +839,6 @@ class AppsFragment : Fragment() {
                                         EditModeHelper.showAppDrawerSettings(context, fragment, prefs, { }, folderPickerLauncher)
                                     } else {
                                         state.selectedItemIndex = displayApps.indexOf(app)
-                                        state.isDpadMode = false
                                         vibrateFeedback()
                                         when (flag) {
                                             Constants.AppDrawerFlag.SetHomeApp,
@@ -1165,7 +921,7 @@ class AppsFragment : Fragment() {
                                         if (first != null) handleAppClick(first)
                                     } catch (_: Exception) {}
                                 },
-                                onInteract = { state.isDpadMode = false },
+                                onInteract = {},
                                 onCloseMenu = {
                                     state.showContextMenu = false
                                     state.showRenameOverlay = false
@@ -1279,19 +1035,6 @@ class AppsFragment : Fragment() {
                                                 setCurrentPageSafe(0)
                                             }
                                         } catch (_: Exception) {}
-                                    },
-                                    dpadSelectedIndex = if (state.azFilterFocused) state.azFilterSelectedIndex else null,
-                                    onDpadIndexChange = { index ->
-                                        state.azFilterSelectedIndex = index
-                                        val letter = azLetters.getOrNull(index)?.toString()
-                                        if (letter != null) {
-                                            try { com.github.gezimos.inkos.helper.utils.VibrationHelper.trigger(com.github.gezimos.inkos.helper.utils.VibrationHelper.Effect.SOFT) } catch (_: Exception) {}
-                                            val newFilter = if (letter == "★") null else letter.firstOrNull()?.uppercaseChar()
-                                            if (newFilter != state.azFilterLetter) {
-                                                state.azFilterLetter = newFilter
-                                                setCurrentPageSafe(0)
-                                            }
-                                        }
                                     },
                                     textIslandsShape = appsDrawer.textIslandsShape,
                                     fontFamily = iconFontFamily,
@@ -1530,8 +1273,6 @@ class AppsFragment : Fragment() {
         }
         val act = activity as? com.github.gezimos.inkos.MainActivity ?: return
         act.pageNavigationHandler = object : com.github.gezimos.inkos.MainActivity.PageNavigationHandler {
-            override val handleDpadAsPage: Boolean = false
-
             override fun pageUp() {
                 try {
                     viewModel.requestAppDrawerPageUp()

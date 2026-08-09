@@ -89,12 +89,6 @@ object GestureHelper {
             Action.OpenRecentsScreen -> {
                 fragment?.findNavController()?.navigate(R.id.recentsFragment)
             }
-            Action.OpenSimpleTray -> {
-                fragment?.findNavController()?.navigate(R.id.simpleTrayFragment)
-            }
-            Action.OpenHub -> {
-                fragment?.findNavController()?.navigate(R.id.hubFragment)
-            }
             Action.OpenSettings -> {
                 fragment?.findNavController()?.navigate(R.id.settingsFragment)
             }

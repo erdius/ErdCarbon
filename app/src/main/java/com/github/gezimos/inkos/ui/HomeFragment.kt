@@ -15,8 +15,6 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricPrompt
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -36,9 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import com.github.gezimos.inkos.ui.compose.OneTimeTooltip
 import com.github.gezimos.inkos.ui.compose.TooltipBubble
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -74,7 +69,6 @@ import com.github.gezimos.inkos.ui.compose.GestureHelper
 import com.github.gezimos.inkos.ui.compose.HomeMediaAction
 import com.github.gezimos.inkos.ui.compose.HomeUI
 import com.github.gezimos.inkos.ui.compose.HomeUiCallbacks
-import com.github.gezimos.inkos.ui.compose.NavHelper
 import com.github.gezimos.inkos.ui.compose.gestureHelper
 import com.github.gezimos.inkos.ui.dialogs.ComposeDialogManager
 import kotlinx.coroutines.Dispatchers
@@ -257,17 +251,6 @@ class HomeFragmentCompose : Fragment() {
                     val appsOnPage = remember(chunks, fullRenderState.currentPage) {
                         chunks.getOrNull(fullRenderState.currentPage) ?: emptyList()
                     }
-                    val selectedIndex = remember { mutableStateOf(0) }
-                    val dpadMode = remember { mutableStateOf(false) }
-                    val dpadActivatedAppId = remember { mutableStateOf<Int?>(null) }
-                    val keyPressTracker = remember { com.github.gezimos.inkos.ui.compose.KeyPressTracker() }
-                    val focusRequester = remember { FocusRequester() }
-                    
-                    // Multi-zone focus navigation state
-                    val focusZone = remember { mutableStateOf(com.github.gezimos.inkos.ui.compose.FocusZone.APPS) }
-                    val selectedMediaButton = remember { mutableStateOf(0) }
-
-                    
                     // Observe edit mode state changes
                     val isEditMode by EditModeHelper.isEditModeFlow.collectAsState()
 
@@ -319,107 +302,11 @@ class HomeFragmentCompose : Fragment() {
                         )
                     }
 
-                    val lastPinchTriggerTime = remember { mutableStateOf(0L) }
-
-                    LaunchedEffect(Unit) {
-                        try { focusRequester.requestFocus() } catch (_: Exception) {}
-                    }
-
-                    LaunchedEffect(fullRenderState.currentPage, appsOnPage.size) {
-                        selectedIndex.value = selectedIndex.value.coerceIn(0, maxOf(appsOnPage.size - 1, 0))
-                    }
-                    
-        LaunchedEffect(focusZone.value) {
-            if (focusZone.value != com.github.gezimos.inkos.ui.compose.FocusZone.APPS) {
-                selectedIndex.value = -1
-            } else if (appsOnPage.isNotEmpty() && selectedIndex.value < 0) {
-                selectedIndex.value = 0
-            }
-            if (focusZone.value != com.github.gezimos.inkos.ui.compose.FocusZone.MEDIA_WIDGET) {
-                selectedMediaButton.value = 0
-            }
-        }
-        
                     Box(modifier = androidx.compose.ui.Modifier.fillMaxSize()
-                        .focusRequester(focusRequester)
-                        .focusable()
-                        .onPreviewKeyEvent { keyEvent ->
-                            try {
-                                val handled = NavHelper.handleHomeKeyEvent(
-                                    keyEvent = keyEvent,
-                                    keyPressTracker = keyPressTracker,
-                                    dpadMode = dpadMode,
-                                    selectedIndex = selectedIndex,
-                                    appsOnPageSize = appsOnPage.size,
-                                    currentPage = fullRenderState.currentPage,
-                                    totalPages = fullRenderState.totalPages,
-                                    appsPerPage = fullRenderState.appsPerPage,
-                                    adjustPageBy = { delta -> try { adjustPageBy(delta, fullRenderState.totalPages) } catch (_: Exception) {} },
-                                    onAppClick = { index ->
-                                        val app = appsOnPage.getOrNull(index)
-                                        if (app != null) {
-                                            dpadActivatedAppId.value = app.id
-                                            handleHomeAppClick(app)
-                                        }
-                                    },
-                                    onAppLongClick = { index ->
-                                        val app = appsOnPage.getOrNull(index)
-                                        if (app != null) {
-                                            handleHomeAppLongClick(app)
-                                        }
-                                    },
-                                    onNavigateBack = { /* not used here */ },
-                                    onSwipeLeft = {
-                                        try {
-                                            GestureHelper.handleSwipeLeft(requireContext(), this@HomeFragmentCompose, viewModel, prefs)
-                                        } catch (_: Exception) {}
-                                    },
-                                    onSwipeRight = {
-                                        try {
-                                            GestureHelper.handleSwipeRight(requireContext(), this@HomeFragmentCompose, viewModel, prefs)
-                                        } catch (_: Exception) {}
-                                    },
-                                    disableSwipeGestures = focusZone.value == com.github.gezimos.inkos.ui.compose.FocusZone.MEDIA_WIDGET,
-                                    // Multi-zone parameters
-                                    focusZone = focusZone,
-                                    selectedMediaButton = selectedMediaButton,
-                                    showClock = fullRenderState.showClock || isEditMode,
-                                    showDate = fullRenderState.showDate || isEditMode,
-                                    showMediaWidget = (fullRenderState.showMediaWidget && fullRenderState.mediaInfo != null) || (isEditMode && fullRenderState.showMediaWidget),
-                                    showQuote = fullRenderState.bottomWidgetType != Constants.BottomWidgetType.Disabled.value || isEditMode,
-                                    onClockClick = { handleClockClick() },
-                                    onDateClick = { handleDateClick() },
-                                    onMediaAction = { buttonIndex ->
-                                        val action = when (buttonIndex) {
-                                            0 -> HomeMediaAction.Open
-                                            1 -> HomeMediaAction.Previous
-                                            2 -> HomeMediaAction.PlayPause
-                                            3 -> HomeMediaAction.Next
-                                            4 -> HomeMediaAction.Stop
-                                            else -> HomeMediaAction.PlayPause
-                                        }
-                                        handleMediaAction(action)
-                                    },
-                                    onQuoteClick = { handleBottomWidgetClick() },
-                                    onSwipeUp = if (prefs.swipeDownAction != Action.Disabled) {
-                                        { try { GestureHelper.handleSwipeDown(requireContext(), this@HomeFragmentCompose, viewModel, prefs) } catch (_: Exception) {} }
-                                    } else null,
-                                    onSwipeDown = if (prefs.swipeUpAction != Action.Disabled) {
-                                        { try { GestureHelper.handleSwipeUp(requireContext(), this@HomeFragmentCompose, viewModel, prefs) } catch (_: Exception) {} }
-                                    } else null
-                                )
-
-                                return@onPreviewKeyEvent handled
-
-                                // continues to the Activity.
-                            } catch (_: Exception) {}
-                            false
-                        }
                         .gestureHelper(
                             shortSwipeRatio = prefs.shortSwipeThresholdRatio,
                             longSwipeRatio = prefs.longSwipeThresholdRatio,
                             onDoubleTap = {
-                                try { dpadMode.value = false } catch (_: Exception) {}
                                 try { handleDoubleTapAction() } catch (_: Exception) {}
                             },
                             onSwipeLeft = {
@@ -443,31 +330,11 @@ class HomeFragmentCompose : Fragment() {
                                     if (fullRenderState.totalPages > 1) adjustPageBy(delta, fullRenderState.totalPages)
                                 } catch (_: Exception) {}
                             },
-                            onAnyTouch = { try {
-                                dpadMode.value = false
-                                focusZone.value = com.github.gezimos.inkos.ui.compose.FocusZone.APPS
-                            } catch (_: Exception) {} },
                             useShortSwipeForActions = fullRenderState.totalPages <= 1
                         )
-                        .pointerInput(Unit) {
-                            detectTransformGestures { _, _, zoom, _ ->
-                                    val currentTime = System.currentTimeMillis()
-                                    if (zoom < 0.99f && currentTime - lastPinchTriggerTime.value > 800L) {
-                                        lastPinchTriggerTime.value = currentTime
-                                        try { VibrationHelper.trigger(VibrationHelper.Effect.CLICK) } catch (_: Exception) {}
-                                        showQuickMenuWithAuth()
-                                    }
-                                }
-                        }
                     ) {
                         HomeUI(
                             state = fullRenderState,
-                            selectedAppId = appsOnPage.getOrNull(selectedIndex.value)?.id,
-                            showDpadMode = dpadMode.value,
-                            dpadActivatedAppId = dpadActivatedAppId.value,
-                            onDpadActivatedHandled = { id -> if (dpadActivatedAppId.value == id) dpadActivatedAppId.value = null },
-                            focusZone = focusZone.value,
-                            selectedMediaButton = selectedMediaButton.value,
                             showEditMode = isEditMode,
                             callbacks = HomeUiCallbacks(
                                 onAppClick = { handleHomeAppClick(it) },
@@ -504,6 +371,13 @@ class HomeFragmentCompose : Fragment() {
                                 onPageDelta = { delta -> adjustPageBy(delta, fullRenderState.totalPages) },
                                 onRootLongPress = { /* handled by wrapper */ },
                                 onBackgroundClick = { handleBackgroundClick() },
+                                onQuickMenuClick = { showQuickMenuWithAuth() },
+                                onAppDrawerClick = {
+                                    try { GestureHelper.executeAction(requireContext(), this@HomeFragmentCompose, viewModel, Action.OpenAppDrawer) } catch (_: Exception) {}
+                                },
+                                onSearchIconClick = {
+                                    try { GestureHelper.executeAction(requireContext(), this@HomeFragmentCompose, viewModel, Action.Search) } catch (_: Exception) {}
+                                },
                                 onAndroidWidgetHeightChange = { height -> viewModel.setAndroidWidgetHeight(height) },
                                 onAndroidWidgetMarginStartChange = { margin -> viewModel.setAndroidWidgetMarginStart(margin) },
                                 onAndroidWidgetMarginEndChange = { margin -> viewModel.setAndroidWidgetMarginEnd(margin) },
@@ -628,14 +502,6 @@ class HomeFragmentCompose : Fragment() {
                         }
                         KeyMapperHelper.HomeKeyAction.OpenQuickMenu -> {
                             showQuickMenuWithAuth()
-                            return true
-                        }
-                        KeyMapperHelper.HomeKeyAction.SwipeLeft -> {
-                            GestureHelper.handleSwipeLeft(requireContext(), this@HomeFragmentCompose, viewModel, prefs)
-                            return true
-                        }
-                        KeyMapperHelper.HomeKeyAction.SwipeRight -> {
-                            GestureHelper.handleSwipeRight(requireContext(), this@HomeFragmentCompose, viewModel, prefs)
                             return true
                         }
                         KeyMapperHelper.HomeKeyAction.LongPressSelected -> {
@@ -843,34 +709,9 @@ class HomeFragmentCompose : Fragment() {
             return
         }
 
-        when (prefs.notificationCountSource) {
-            1 -> {
-                // Letters mode: navigate to LettersFragment
-                try {
-                    findNavController().navigate(R.id.lettersFragment)
-                } catch (_: Exception) {}
-            }
-            2 -> {
-                // Hub mode: navigate to HubFragment
-                try {
-                    findNavController().navigate(R.id.action_mainFragment_to_hubFragment)
-                } catch (_: Exception) {
-                    try {
-                        findNavController().navigate(R.id.hubFragment)
-                    } catch (_: Exception) {}
-                }
-            }
-            else -> {
-                // SimpleTray mode (default)
-                try {
-                    findNavController().navigate(R.id.action_mainFragment_to_simpleTrayFragment)
-                } catch (_: Exception) {
-                    try {
-                        findNavController().navigate(R.id.simpleTrayFragment)
-                    } catch (_: Exception) {}
-                }
-            }
-        }
+        try {
+            findNavController().navigate(R.id.lettersFragment)
+        } catch (_: Exception) {}
     }
 
     private fun handleBackgroundClick() {

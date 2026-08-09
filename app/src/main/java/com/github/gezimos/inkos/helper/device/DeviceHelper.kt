@@ -41,29 +41,6 @@ object DeviceHelper {
         }
     }
 
-    fun isDpadDevice(): Boolean {
-        if (isMuditaKompakt()) return true
-
-        val brand = Build.BRAND.lowercase()
-        val manufacturer = Build.MANUFACTURER.lowercase()
-        val model = Build.MODEL.lowercase()
-
-        return when {
-            // Cat S22 Flip
-            (brand == "cat" || manufacturer == "cat") && model.contains("s22") -> true
-            // Doov
-            manufacturer == "doov" || brand == "doov" -> true
-            // Duoqin / Qin (F21 Pro, F22 Pro, etc.)
-            manufacturer == "duoqin" || brand == "duoqin" -> true
-            manufacturer == "qin" || brand == "qin" || model.startsWith("qin ") || model.startsWith("f21") || model.startsWith("f22") -> true
-            // TCL Flip
-            manufacturer == "tcl" && model.contains("flip") -> true
-            // Dumber Mini / Dumbphone Factory
-            brand == "dumber" || model.contains("dumber") -> true
-            else -> false
-        }
-    }
-
     fun isQwertyDevice(): Boolean {
         val brand = Build.BRAND.lowercase()
         val manufacturer = Build.MANUFACTURER.lowercase()

@@ -856,10 +856,6 @@ fun AppItem(
     ) {
         when {
             showRename -> {
-                // Track if save button is focused (for DPAD mode)
-                var saveButtonFocused by remember { mutableStateOf(false) }
-                val saveButtonFocusRequester = remember { FocusRequester() }
-                
                 Row(
                     modifier = Modifier
                         .wrapContentWidth()
@@ -872,19 +868,7 @@ fun AppItem(
                         onValueChange = { renameText = it },
                         modifier = Modifier
                             .weight(1f)
-                            .focusRequester(renameFocusRequester)
-                            .onPreviewKeyEvent { keyEvent ->
-                                if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-                                when (keyEvent.key) {
-                                    Key.DirectionRight, Key.Tab -> {
-                                        // Move focus to save button
-                                        saveButtonFocused = true
-                                        try { saveButtonFocusRequester.requestFocus() } catch (_: Exception) {}
-                                        true
-                                    }
-                                    else -> false
-                                }
-                            },
+                            .focusRequester(renameFocusRequester),
                         textStyle = TextStyle(
                             color = Theme.colors.text,
                             fontSize = uiState.appDrawerSize.sp.scaled(screenScale),
@@ -909,8 +893,8 @@ fun AppItem(
                     )
                     
                     // Use same color logic as context menu buttons:
-                    val saveBgColor = if (saveButtonFocused) textColor else Color.Transparent
-                    val saveTextColor = if (saveButtonFocused) bgColor else textColor
+                    val saveBgColor = Color.Transparent
+                    val saveTextColor = textColor
                     val saveBorderColor = textColor
                     
                     // Shape from textIslandsShape
@@ -924,38 +908,6 @@ fun AppItem(
                     
                     Box(
                         modifier = Modifier
-                            .focusRequester(saveButtonFocusRequester)
-                            .focusable()
-                            .onPreviewKeyEvent { keyEvent ->
-                                if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-                                when (keyEvent.key) {
-                                    Key.DirectionLeft -> {
-                                        // Move focus back to text field
-                                        saveButtonFocused = false
-                                        try { renameFocusRequester.requestFocus() } catch (_: Exception) {}
-                                        true
-                                    }
-                                    Key.DirectionCenter, Key.Enter -> {
-                                        when {
-                                            renameText.text.isEmpty() -> {
-                                                onRename(app.activityPackage + (app.shortcutId?.let { "|$it" } ?: ""), "RESET_TO_ORIGINAL")
-                                            }
-                                            renameText.text.trim() == originalRenameText -> {
-                                            }
-                                            else -> {
-                                                onRename(app.activityPackage + (app.shortcutId?.let { "|$it" } ?: ""), renameText.text.trim())
-                                            }
-                                        }
-                                        onCloseMenu()
-                                        true
-                                    }
-                                    Key.Escape, Key.Back -> {
-                                        onCloseMenu()
-                                        true
-                                    }
-                                    else -> false
-                                }
-                            }
                             .border(
                                 width = 2.dp,
                                 color = saveBorderColor,

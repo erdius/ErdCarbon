@@ -386,34 +386,7 @@ class SettingsFragment : Fragment() {
                                     }
                                 },
                                 showStatusBar = uiState.showStatusBar,
-                                pageIndicator = {
-                                    val interactionSource = remember { MutableInteractionSource() }
-                                    val isFocused = interactionSource.collectIsFocusedAsState().value
-                                    val textColor = Theme.colors.text
-                                    val bgColor = Theme.colors.background
-                                    Text(
-                                        text = stringResource(R.string.buy_me_a_coffee),
-                                        style = SettingsTheme.typography.title,
-                                        fontSize = if (settingsSize > 0) (settingsSize * 1.2).sp else TextUnit.Unspecified,
-                                        color = if (isFocused) bgColor else textColor,
-                                        modifier = Modifier
-                                            .padding(start = 8.dp)
-                                            .clip(supportButtonShape)
-                                            .background(if (isFocused) textColor else Color.Transparent)
-                                            .border(
-                                                width = 2.dp,
-                                                color = textColor,
-                                                shape = supportButtonShape
-                                            )
-                                            .clickable(
-                                                interactionSource = interactionSource,
-                                                indication = null
-                                            ) {
-                                                try { context.startActivity(Intent(Intent.ACTION_VIEW, "https://buymeacoffee.com/gezimos".toUri())) } catch (_: Exception) {}
-                                            }
-                                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                                    )
-                                },
+                                pageIndicator = {},
                                 titleFontSize = if (settingsSize > 0) (settingsSize * 1.5).sp else TextUnit.Unspecified
                             )
                         } else {
@@ -666,47 +639,6 @@ class SettingsFragment : Fragment() {
         val context = androidx.compose.ui.platform.LocalContext.current
 
         Column(modifier = Modifier.fillMaxSize()) {
-            SettingsTitle(text = stringResource(R.string.donate), fontSize = titleFontSize)
-            SettingsHomeItem(
-                title = stringResource(R.string.buy_me_a_coffee),
-                imageVector = Icons.Rounded.Coffee,
-                description = stringResource(R.string.desc_buy_coffee),
-                titleFontSize = titleFontSize,
-                onClick = {
-                    try { context.startActivity(Intent(Intent.ACTION_VIEW, "https://buymeacoffee.com/gezimos".toUri())) } catch (_: Exception) {}
-                }
-            )
-            SettingsHomeItem(
-                title = stringResource(R.string.github_sponsors),
-                imageVector = Icons.Rounded.Favorite,
-                description = stringResource(R.string.desc_github_sponsor),
-                titleFontSize = titleFontSize,
-                onClick = {
-                    try { context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/sponsors/gezimos".toUri())) } catch (_: Exception) {}
-                }
-            )
-            SettingsTitle(text = stringResource(R.string.community), fontSize = titleFontSize)
-            SettingsHomeItem(
-                title = stringResource(R.string.report_issues),
-                imageVector = Icons.Rounded.BugReport,
-                description = stringResource(R.string.desc_report_bugs),
-                titleFontSize = titleFontSize,
-                onClick = {
-                    try { context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/gezimos/inkOS/issues".toUri())) } catch (_: Exception) {}
-                }
-            )
-            SettingsHomeItem(
-                title = stringResource(R.string.reddit_inkos),
-                imageVector = Icons.Rounded.Forum,
-                description = stringResource(R.string.desc_reddit_community),
-                titleFontSize = titleFontSize,
-                onClick = {
-                    try {
-                        try { context.startActivity(Intent(Intent.ACTION_VIEW, "reddit://r/inkos".toUri())) }
-                        catch (_: Exception) { context.startActivity(Intent(Intent.ACTION_VIEW, "https://reddit.com/r/inkos".toUri())) }
-                    } catch (_: Exception) {}
-                }
-            )
             SettingsTitle(text = stringResource(R.string.about), fontSize = titleFontSize)
             SettingsHomeItem(
                 title = "${stringResource(R.string.app_version)} v${BuildConfig.VERSION_NAME}",
@@ -725,7 +657,7 @@ class SettingsFragment : Fragment() {
             SettingsHomeItem(
                 title = stringResource(R.string.credits),
                 imageVector = Icons.Rounded.Code,
-                description = "mLauncher, oLauncher — ${stringResource(R.string.desc_open_source)}",
+                description = "inkOS, mLauncher, oLauncher — ${stringResource(R.string.desc_open_source)}",
                 titleFontSize = titleFontSize,
                 onClick = {}
             )
@@ -866,7 +798,7 @@ class SettingsFragment : Fragment() {
             )
             SettingsHomeItem(
                 title = stringResource(R.string.advanced_settings_restart_title),
-                description = "Restart inkOS without rebooting the device",
+                description = "Restart ErdCarbon without rebooting the device",
                 titleFontSize = titleFontSize,
                 onClick = { AppReloader.restartApp(requireContext()) }
             )
@@ -902,6 +834,25 @@ class SettingsFragment : Fragment() {
         }
         val alignmentLabels = listOf(
             stringResource(R.string.left), stringResource(R.string.center), stringResource(R.string.right)
+        )
+        val quickMenuCornerLabels = listOf(
+            stringResource(R.string.corner_top_left),
+            stringResource(R.string.corner_top_right),
+            stringResource(R.string.corner_bottom_left),
+            stringResource(R.string.corner_bottom_right),
+            stringResource(R.string.corner_bottom_middle)
+        )
+        val appDrawerCornerLabels = listOf(
+            stringResource(R.string.corner_bottom_left),
+            stringResource(R.string.corner_bottom_right),
+            stringResource(R.string.corner_bottom_middle),
+            stringResource(R.string.icon_hidden)
+        )
+        val searchCornerLabels = listOf(
+            stringResource(R.string.corner_bottom_left),
+            stringResource(R.string.corner_bottom_right),
+            stringResource(R.string.corner_bottom_middle),
+            stringResource(R.string.icon_hidden)
         )
 
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -973,6 +924,27 @@ class SettingsFragment : Fragment() {
                 fontSize = titleFontSize,
                 description = stringResource(R.string.desc_home_alignment),
                 onClick = { viewModel.setHomeAlignment((homeUiState.homeAlignment + 1) % 3) }
+            )
+            SettingsSelect(
+                title = stringResource(R.string.quick_menu_icon_position),
+                option = quickMenuCornerLabels.getOrElse(homeUiState.quickMenuIconPosition) { quickMenuCornerLabels[3] },
+                fontSize = titleFontSize,
+                description = stringResource(R.string.desc_quick_menu_icon_position),
+                onClick = { viewModel.setQuickMenuIconPosition((homeUiState.quickMenuIconPosition + 1) % 5) }
+            )
+            SettingsSelect(
+                title = stringResource(R.string.app_drawer_icon_position),
+                option = appDrawerCornerLabels.getOrElse(homeUiState.appDrawerIconPosition) { appDrawerCornerLabels[0] },
+                fontSize = titleFontSize,
+                description = stringResource(R.string.desc_app_drawer_icon_position),
+                onClick = { viewModel.setAppDrawerIconPosition((homeUiState.appDrawerIconPosition + 1) % 4) }
+            )
+            SettingsSelect(
+                title = stringResource(R.string.search_icon_position),
+                option = searchCornerLabels.getOrElse(homeUiState.searchIconPosition) { searchCornerLabels[2] },
+                fontSize = titleFontSize,
+                description = stringResource(R.string.desc_search_icon_position),
+                onClick = { viewModel.setSearchIconPosition((homeUiState.searchIconPosition + 1) % 4) }
             )
             // Clock Section
             SettingsTitle(text = stringResource(R.string.clock_section), fontSize = titleFontSize)
@@ -1050,13 +1022,6 @@ class SettingsFragment : Fragment() {
             SettingsSwitch(text = stringResource(R.string.show_notification_count), fontSize = titleFontSize,
                 description = stringResource(R.string.desc_notification_count),
                 defaultState = homeUiState.showNotificationCount, onCheckedChange = { viewModel.setShowNotificationCount(it) })
-            if (homeUiState.showNotificationCount) {
-                val countSourceLabels = arrayOf(stringResource(R.string.option_simple_tray), stringResource(R.string.option_letters), stringResource(R.string.option_hub))
-                SettingsSelect(title = stringResource(R.string.desc_notification_style),
-                    option = countSourceLabels.getOrElse(homeUiState.notificationCountSource) { "SimpleTray" },
-                    description = stringResource(R.string.desc_notification_style),
-                    fontSize = titleFontSize, onClick = { viewModel.setNotificationCountSource((homeUiState.notificationCountSource + 1) % 3) })
-            }
             SettingsSelect(title = stringResource(R.string.home_date_alignment),
                 option = alignmentLabels.getOrElse(homeUiState.dateAlignment) { stringResource(R.string.left) },
                 optionAlignment = homeUiState.dateAlignment,
@@ -2460,21 +2425,6 @@ class SettingsFragment : Fragment() {
                 LaunchedEffect(Unit) {
                     showAllowlistDialog = false
                     showAppAllowlistDialog(getString(R.string.letters_allowlist), uiState.allowedNotificationApps) { viewModel.setAllowedNotificationApps(it) }
-                }
-            }
-            SettingsTitle(text = stringResource(R.string.simple_tray_title), fontSize = titleFontSize)
-            SettingsSelect(title = stringResource(R.string.notifications_per_page), option = uiState.notificationsPerPage.toString(),
-                fontSize = titleFontSize, description = stringResource(R.string.desc_noti_per_page), onClick = { viewModel.setNotificationsPerPage((uiState.notificationsPerPage % 5) + 1) }, enabled = pushNotificationsEnabled)
-            SettingsSwitch(text = stringResource(R.string.enable_bottom_navigation), fontSize = titleFontSize,
-                description = stringResource(R.string.desc_bottom_nav),
-                defaultState = uiState.enableBottomNav, onCheckedChange = { viewModel.setEnableBottomNav(it) }, enabled = pushNotificationsEnabled)
-            var showSimpleTrayAllowlistDialog by remember { mutableStateOf(false) }
-            SettingsSelect(title = stringResource(R.string.simple_tray_allowlist), option = uiState.allowedSimpleTrayApps.size.toString(),
-                fontSize = titleFontSize, description = stringResource(R.string.desc_simple_tray_filter), onClick = { showSimpleTrayAllowlistDialog = true }, enabled = pushNotificationsEnabled)
-            if (showSimpleTrayAllowlistDialog) {
-                LaunchedEffect(Unit) {
-                    showSimpleTrayAllowlistDialog = false
-                    showAppAllowlistDialog("Simple Tray Apps", uiState.allowedSimpleTrayApps) { viewModel.setAllowedSimpleTrayApps(it) }
                 }
             }
         }

@@ -1,5 +1,12 @@
 @file:Suppress("UnstableApiUsage")
 
+import java.util.Properties
+
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) load(file.inputStream())
+}
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -12,7 +19,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "app.inkos"
+        applicationId = "com.erdman.erdcarbon"
         minSdk = 26
         targetSdk = 36
         versionCode = 101013
@@ -28,12 +35,22 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePath = System.getenv("KEYSTORE_FILE")
-            if (keystorePath != null) {
-                storeFile = file(keystorePath)
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
+            // Prefer a local keystore.properties (matches every other app in
+            // this family); fall back to upstream's env-var-based CI signing
+            // if it isn't present.
+            if (keystoreProperties.containsKey("storeFile")) {
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            } else {
+                val keystorePath = System.getenv("KEYSTORE_FILE")
+                if (keystorePath != null) {
+                    storeFile = file(keystorePath)
+                    storePassword = System.getenv("KEYSTORE_PASSWORD")
+                    keyAlias = System.getenv("KEY_ALIAS")
+                    keyPassword = System.getenv("KEY_PASSWORD")
+                }
             }
         }
     }
@@ -48,7 +65,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            resValue("string", "app_name", "inkOS Debug")
+            resValue("string", "app_name", "ErdCarbon Debug")
         }
 
         getByName("release") {
@@ -59,7 +76,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            resValue("string", "app_name", "inkOS")
+            resValue("string", "app_name", "ErdCarbon")
             val releaseSigning = signingConfigs.findByName("release")
             if (releaseSigning?.storeFile != null) {
                 signingConfig = releaseSigning

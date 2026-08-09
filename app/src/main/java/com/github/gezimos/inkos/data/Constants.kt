@@ -62,15 +62,11 @@ object Constants {
 
     const val INKOS_SHORTCUT_APP_DRAWER = "inkos_app_drawer"
     const val INKOS_SHORTCUT_NOTIFICATIONS = "inkos_notifications"
-    const val INKOS_SHORTCUT_SIMPLE_TRAY = "inkos_simple_tray"
-    const val INKOS_SHORTCUT_HUB = "inkos_hub"
     const val INKOS_SHORTCUT_RECENTS = "inkos_recents"
     const val INKOS_SHORTCUT_SETTINGS = "inkos_settings"
 
     const val ACTION_OPEN_APP_DRAWER = "com.github.gezimos.inkos.action.OPEN_APP_DRAWER"
     const val ACTION_OPEN_NOTIFICATIONS = "com.github.gezimos.inkos.action.OPEN_NOTIFICATIONS"
-    const val ACTION_OPEN_SIMPLE_TRAY = "com.github.gezimos.inkos.action.OPEN_SIMPLE_TRAY"
-    const val ACTION_OPEN_HUB = "com.github.gezimos.inkos.action.OPEN_HUB"
     const val ACTION_OPEN_RECENTS = "com.github.gezimos.inkos.action.OPEN_RECENTS"
     const val ACTION_OPEN_SETTINGS = "com.github.gezimos.inkos.action.OPEN_SETTINGS"
 
@@ -142,7 +138,6 @@ object Constants {
         const val SHOW_CLOCK = "SHOW_CLOCK"
         const val SHOW_DATE_BATTERY_COMBO = "SHOW_DATE_BATTERY_COMBO"
         const val SHOW_NOTIFICATION_COUNT = "SHOW_NOTIFICATION_COUNT"
-        const val NOTIFICATION_COUNT_SOURCE = "NOTIFICATION_COUNT_SOURCE"
         const val BACKGROUND_OPACITY = "BACKGROUND_OPACITY"
         const val HOME_ALIGNMENT = "HOME_ALIGNMENT"
         const val HOME_CLOCK_ALIGNMENT = "HOME_CLOCK_ALIGNMENT"
@@ -262,7 +257,6 @@ object Constants {
     OpenAppDrawer,
     OpenLettersScreen,
     OpenRecentsScreen,
-    OpenSimpleTray,
     EinkRefresh,
     Brightness, // New action for brightness control
     LockScreen,
@@ -271,7 +265,6 @@ object Constants {
     OpenPowerDialog,
     RestartApp,
     ExitLauncher,
-    OpenHub,
     OpenSettings,
     Search,
     TogglePrivateSpace,
@@ -281,7 +274,7 @@ object Constants {
             /** inkOS-related actions for gesture picker Tab 2 */
             val INKOS_ACTIONS = listOf(
                 OpenAppDrawer, OpenLettersScreen, OpenRecentsScreen,
-                OpenSimpleTray, OpenHub, OpenSettings, Search, EinkRefresh, Brightness
+                OpenSettings, Search, EinkRefresh, Brightness
             )
             /** System actions for gesture picker Tab 3 */
             val SYSTEM_ACTIONS = listOf(
@@ -298,8 +291,6 @@ object Constants {
                 RestartApp -> context.getString(R.string.restart_launcher)
                 OpenLettersScreen -> context.getString(R.string.letters_screen_title)
                 OpenRecentsScreen -> "Recents"
-                OpenSimpleTray -> context.getString(R.string.simple_tray_title)
-                OpenHub -> context.getString(R.string.shortcut_hub_short)
                 OpenSettings -> "Settings"
                 OpenAppDrawer -> context.getString(R.string.app_drawer)
                 EinkRefresh -> context.getString(R.string.eink_refresh)
@@ -323,8 +314,6 @@ object Constants {
                 RestartApp -> stringResource(R.string.restart_launcher)
                 OpenLettersScreen -> stringResource(R.string.letters_screen_title)
                 OpenRecentsScreen -> "Recents"
-                OpenSimpleTray -> stringResource(R.string.simple_tray_title)
-                OpenHub -> stringResource(R.string.shortcut_hub_short)
                 OpenSettings -> "Settings"
                 OpenAppDrawer -> stringResource(R.string.app_drawer)
                 EinkRefresh -> stringResource(R.string.eink_refresh)

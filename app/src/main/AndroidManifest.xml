@@ -12,10 +12,6 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.BLUETOOTH"
-        android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
-        android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"
         android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -35,7 +31,6 @@
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.ACCESS_HIDDEN_PROFILES" />
 
     <application
         android:name="com.github.gezimos.inkos.inkOS"
@@ -79,9 +74,6 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/inkos_shortcuts" />
-            <property
-                android:name="android.app.home.HANDLE_PRIVATE_PROFILE"
-                android:value="true" />
         </activity>
 
         <activity

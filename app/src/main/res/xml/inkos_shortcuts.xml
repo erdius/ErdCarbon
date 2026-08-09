@@ -26,30 +26,6 @@
     </shortcut>
 
     <shortcut
-        android:shortcutId="inkos_simple_tray"
-        android:enabled="true"
-        android:icon="@mipmap/ic_launcher"
-        android:shortcutShortLabel="@string/shortcut_simple_tray_short"
-        android:shortcutLongLabel="@string/shortcut_simple_tray_short">
-        <intent
-            android:action="com.github.gezimos.inkos.action.OPEN_SIMPLE_TRAY"
-            android:targetPackage="${applicationId}"
-            android:targetClass="com.github.gezimos.inkos.MainActivity" />
-    </shortcut>
-
-    <shortcut
-        android:shortcutId="inkos_hub"
-        android:enabled="true"
-        android:icon="@mipmap/ic_launcher"
-        android:shortcutShortLabel="@string/shortcut_hub_short"
-        android:shortcutLongLabel="@string/shortcut_hub_short">
-        <intent
-            android:action="com.github.gezimos.inkos.action.OPEN_HUB"
-            android:targetPackage="${applicationId}"
-            android:targetClass="com.github.gezimos.inkos.MainActivity" />
-    </shortcut>
-
-    <shortcut
         android:shortcutId="inkos_recents"
         android:enabled="true"
         android:icon="@mipmap/ic_launcher"

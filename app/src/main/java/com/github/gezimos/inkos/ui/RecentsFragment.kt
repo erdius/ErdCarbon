@@ -11,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -30,14 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -67,7 +59,6 @@ import com.github.gezimos.inkos.style.rememberScreenScale
 import com.github.gezimos.inkos.style.scaled
 import com.github.gezimos.inkos.helper.EditModeHelper
 import com.github.gezimos.inkos.ui.compose.EditModeOverlay
-import com.github.gezimos.inkos.ui.compose.NavHelper
 import com.github.gezimos.inkos.ui.dialogs.SheetTitle
 import com.github.gezimos.inkos.ui.compose.RecentAppItem
 import com.github.gezimos.inkos.ui.compose.RecentsLayout
@@ -371,15 +362,7 @@ class RecentsFragment : Fragment() {
                 
                 val isDark = appsDrawer.appTheme == Constants.Theme.Dark
                 val backgroundColor = getHexForOpacity(requireContext())
-                val columnFocusRequester = remember { FocusRequester() }
-                val keyPressTracker = remember { com.github.gezimos.inkos.ui.compose.KeyPressTracker() }
 
-                LaunchedEffect(Unit) {
-                    try {
-                        columnFocusRequester.requestFocus()
-                    } catch (_: Exception) {}
-                }
-                
                 SettingsTheme(isDark = isDark) {
                     Box(
                         modifier = Modifier
@@ -395,118 +378,6 @@ class RecentsFragment : Fragment() {
                                 .fillMaxSize()
                                 .padding(32.dp.scaled(rememberScreenScale()))
                                 .onSizeChanged { containerSize = it }
-                                .focusRequester(columnFocusRequester)
-                                .focusable()
-                                .onPreviewKeyEvent { keyEvent ->
-                                    // Header DPAD navigation
-                                    if (keyEvent.type == KeyEventType.KeyDown) {
-                                        if (headerFocused) {
-                                            when (keyEvent.key) {
-                                                Key.DirectionDown -> {
-                                                    headerFocused = false
-                                                    state.isDpadMode = true
-                                                    state.selectedItemIndex = 0
-                                                    return@onPreviewKeyEvent true
-                                                }
-                                                Key.DirectionLeft -> {
-                                                    if (headerSelectedIndex > 0) {
-                                                        headerSelectedIndex--
-                                                    }
-                                                    return@onPreviewKeyEvent true
-                                                }
-                                                Key.DirectionRight -> {
-                                                    if (headerSelectedIndex < 1) {
-                                                        headerSelectedIndex++
-                                                    }
-                                                    return@onPreviewKeyEvent true
-                                                }
-                                                Key.Enter, Key.NumPadEnter, Key.DirectionCenter -> {
-                                                    when (headerSelectedIndex) {
-                                                        0 -> { showStats = !showStats }
-                                                        1 -> {
-                                                            EditModeHelper.showRecentsSettings(
-                                                                requireContext(), this@RecentsFragment, prefs
-                                                            ) {}
-                                                        }
-                                                    }
-                                                    return@onPreviewKeyEvent true
-                                                }
-                                                Key.Back, Key.Escape -> {
-                                                    headerFocused = false
-                                                    state.isDpadMode = true
-                                                    state.selectedItemIndex = 0
-                                                    return@onPreviewKeyEvent true
-                                                }
-                                                Key.DirectionUp -> {
-                                                    // Already at top, do nothing
-                                                    return@onPreviewKeyEvent true
-                                                }
-                                            }
-                                        } else if (keyEvent.key == Key.DirectionUp &&
-                                            state.selectedItemIndex == 0 && state.currentPage == 0 && state.isDpadMode
-                                        ) {
-                                            // Move from first app item to header
-                                            headerFocused = true
-                                            state.isDpadMode = false
-                                            return@onPreviewKeyEvent true
-                                        }
-                                    }
-                                    if (keyEvent.type == KeyEventType.KeyUp && headerFocused) {
-                                        return@onPreviewKeyEvent true
-                                    }
-
-                                    try {
-                                        val handled = NavHelper.handleAppsKeyEvent(
-                                            keyEvent = keyEvent,
-                                            keyPressTracker = keyPressTracker,
-                                            isDpadModeSetter = { v -> state.isDpadMode = v },
-                                            selectedIndexGetter = { state.selectedItemIndex },
-                                            selectedIndexSetter = { v ->
-                                                state.selectedItemIndex = v
-                                                headerFocused = false
-                                            },
-                                            currentPage = state.currentPage,
-                                            totalPages = totalPages,
-                                            displayAppsSize = displayRecentApps.size,
-                                            onPreviousPage = { previousPage() },
-                                            onNextPage = { nextPage() },
-                                            onAppClick = { index ->
-                                                val selectedApp = displayRecentApps.getOrNull(index)
-                                                if (selectedApp != null) {
-                                                    if (isEditMode) {
-                                                        EditModeHelper.showRecentsSettings(requireContext(), this@RecentsFragment, prefs) {}
-                                                    } else {
-                                                        handleAppClick(selectedApp)
-                                                    }
-                                                }
-                                            },
-                                            onAppLongClick = { index ->
-                                                val selectedApp = displayRecentApps.getOrNull(index)
-                                                if (selectedApp != null) {
-                                                    if (isEditMode) {
-                                                        EditModeHelper.showRecentsSettings(requireContext(), this@RecentsFragment, prefs) {}
-                                                    } else {
-                                                        vibrateFeedback()
-                                                        handleInfoApp(selectedApp.app)
-                                                    }
-                                                }
-                                            },
-                                            onNavigateBack = { findNavController().popBackStack() },
-                                            showAzFilter = false,
-                                            azFilterFocused = false,
-                                            onAzFilterFocusChange = {},
-                                            azFilterSelectedIndex = 0,
-                                            onAzFilterIndexChange = {},
-                                            azFilterSize = 0,
-                                            onAzFilterActivate = {},
-                                            showSearch = false,
-                                            onSearchFocus = {}
-                                        )
-                                        if (handled) return@onPreviewKeyEvent true
-                                    } catch (_: Exception) {}
-
-                                    false
-                                }
                                 .gestureHelper(
                                     shortSwipeRatio = prefs.shortSwipeThresholdRatio,
                                     longSwipeRatio = prefs.longSwipeThresholdRatio,
@@ -693,8 +564,6 @@ class RecentsFragment : Fragment() {
         
         val act = activity as? com.github.gezimos.inkos.MainActivity ?: return
         act.pageNavigationHandler = object : com.github.gezimos.inkos.MainActivity.PageNavigationHandler {
-            override val handleDpadAsPage: Boolean = false
-
             override fun pageUp() {
                 try {
                     viewModel.requestAppDrawerPageUp()

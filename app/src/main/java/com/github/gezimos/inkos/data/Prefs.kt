@@ -108,6 +108,9 @@ private const val INITIAL_LAUNCH_COMPLETED = "INITIAL_LAUNCH_COMPLETED"
 private const val HOME_APPS_Y_OFFSET = "HOME_APPS_Y_OFFSET"
 private const val HIDE_HOME_APPS = "HIDE_HOME_APPS"
 private const val HOME_ALIGNMENT = "HOME_ALIGNMENT"
+private const val QUICK_MENU_ICON_POSITION = "QUICK_MENU_ICON_POSITION"
+private const val APP_DRAWER_ICON_POSITION = "APP_DRAWER_ICON_POSITION"
+private const val SEARCH_ICON_POSITION = "SEARCH_ICON_POSITION"
 private const val TEXT_ISLANDS = "TEXT_ISLANDS"
 private const val TEXT_ISLANDS_INVERTED = "TEXT_ISLANDS_INVERTED"
 private const val TEXT_ISLANDS_SHAPE = "TEXT_ISLANDS_SHAPE"
@@ -204,10 +207,6 @@ class Prefs(val context: Context) {
     var showNotificationCount: Boolean
         get() = prefs.getBoolean("SHOW_NOTIFICATION_COUNT", true)
         set(value) = prefs.edit { putBoolean("SHOW_NOTIFICATION_COUNT", value) }
-
-    var notificationCountSource: Int
-        get() = prefs.getInt("NOTIFICATION_COUNT_SOURCE", 0)
-        set(value) = prefs.edit { putInt("NOTIFICATION_COUNT_SOURCE", value) }
 
     var showQuote: Boolean
         get() = bottomWidgetType == Constants.BottomWidgetType.Quote.value
@@ -322,7 +321,7 @@ class Prefs(val context: Context) {
         "APP_DRAWER_AUTO_LAUNCH", "APP_DRAWER_AUTO_SHOW_KEYBOARD",
         "APP_DRAWER_AZ_FILTER", "APP_DRAWER_PAGER",
         SHOW_CLOCK, CLOCK_MODE, CLOCK_STYLE, SHOW_AM_PM, SHOW_SECOND_CLOCK,
-        SECOND_CLOCK_OFFSET_HOURS, "SHOW_DATE_BATTERY_COMBO", "SHOW_NOTIFICATION_COUNT", "NOTIFICATION_COUNT_SOURCE", "DATE_FORMAT_STYLE",
+        SECOND_CLOCK_OFFSET_HOURS, "SHOW_DATE_BATTERY_COMBO", "SHOW_NOTIFICATION_COUNT", "DATE_FORMAT_STYLE",
         Constants.PrefKeys.BOTTOM_WIDGET_TYPE, QUOTE_TEXT, "top_widget_margin", "bottom_widget_margin",
         TEXT_ISLANDS, TEXT_ISLANDS_INVERTED, TEXT_ISLANDS_SHAPE,
         "SHOW_DATE", SHOW_QUOTE, SMALL_CAPS_APPS, ALL_CAPS_APPS,
@@ -626,20 +625,12 @@ class Prefs(val context: Context) {
         get() = prefs.getInt(NOTIFICATIONS_TEXT_SIZE, dimenSp(R.dimen.default_notifications_text_size))
         set(value) = prefs.edit { putInt(NOTIFICATIONS_TEXT_SIZE, value) }
 
-    var notificationsPerPage: Int
-        get() = prefs.getInt(NOTIFICATIONS_PER_PAGE, 3).coerceIn(1, 5)
-        set(value) = prefs.edit { putInt(NOTIFICATIONS_PER_PAGE, value.coerceIn(1, 5)) }
-
     var edgeSwipeBackEnabled: Boolean
         get() = prefs.getBoolean(EDGE_SWIPE_BACK_ENABLED, true)
         set(value) {
             prefs.edit { putBoolean(EDGE_SWIPE_BACK_ENABLED, value) }
             try { _edgeSwipeBackEnabledFlow.value = value } catch (e: Exception) { Log.w("Prefs", "edgeSwipeBackEnabledFlow update failed", e) }
         }
-
-    var enableBottomNav: Boolean
-        get() = prefs.getBoolean(ENABLE_BOTTOM_NAV, true)
-        set(value) = prefs.edit { putBoolean(ENABLE_BOTTOM_NAV, value) }
 
     var showNotificationSenderFullName: Boolean
         get() = prefs.getBoolean("show_notification_sender_full_name", false)
@@ -1180,7 +1171,7 @@ class Prefs(val context: Context) {
                 Constants.Action.valueOf(
                     prefs.getString(
                         SWIPE_DOWN_ACTION,
-                        Constants.Action.OpenSimpleTray.name // default: Open Simple Tray
+                        Constants.Action.OpenLettersScreen.name // default: Open Letters
                     ).toString()
                 )
             } catch (_: Exception) {
@@ -1626,6 +1617,29 @@ class Prefs(val context: Context) {
         get() = prefs.getInt(HOME_ALIGNMENT, 0)
         set(value) = prefs.edit { putInt(HOME_ALIGNMENT, value.coerceIn(0, 2)) }
 
+    // Corner for the persistent Quick Menu (Settings) icon on the home screen,
+    // replacing the old pinch-to-open gesture: 0=Top-Left, 1=Top-Right,
+    // 2=Bottom-Left, 3=Bottom-Right, 4=Bottom-Middle.
+    var quickMenuIconPosition: Int
+        get() = prefs.getInt(QUICK_MENU_ICON_POSITION, 3)
+        set(value) = prefs.edit { putInt(QUICK_MENU_ICON_POSITION, value.coerceIn(0, 4)) }
+
+    // Bottom position for the persistent App Drawer icon on the home screen:
+    // 0=Bottom-Left, 1=Bottom-Right, 2=Bottom-Middle, 3=Hidden. Defaults to the
+    // opposite corner from the Quick Menu icon's default (Bottom-Right) so they
+    // don't collide out of the box.
+    var appDrawerIconPosition: Int
+        get() = prefs.getInt(APP_DRAWER_ICON_POSITION, 0)
+        set(value) = prefs.edit { putInt(APP_DRAWER_ICON_POSITION, value.coerceIn(0, 3)) }
+
+    // Bottom position for the persistent Search icon on the home screen:
+    // 0=Bottom-Left, 1=Bottom-Right, 2=Bottom-Middle, 3=Hidden. Defaults to
+    // Bottom-Middle so it doesn't collide with the App Drawer (Bottom-Left) or
+    // Quick Menu (Bottom-Right) icons out of the box.
+    var searchIconPosition: Int
+        get() = prefs.getInt(SEARCH_ICON_POSITION, 2)
+        set(value) = prefs.edit { putInt(SEARCH_ICON_POSITION, value.coerceIn(0, 3)) }
+
     var homeClockAlignment: Int
         get() {
             val v = prefs.getInt(Constants.PrefKeys.HOME_CLOCK_ALIGNMENT, -1)
@@ -1785,12 +1799,6 @@ class Prefs(val context: Context) {
             ?: mutableSetOf()
         set(value) = prefs.edit { putStringSet("allowed_badge_notification_apps", value) }
 
-    // Per-app allowlist for SimpleTray notifications
-    var allowedSimpleTrayApps: MutableSet<String>
-        get() = prefs.getStringSet("allowed_simple_tray_apps", mutableSetOf())
-            ?: mutableSetOf()
-        set(value) = prefs.edit { putStringSet("allowed_simple_tray_apps", value) }
-
     // --- Volume keys for page navigation ---
     var useVolumeKeysForPages: Boolean
         get() = prefs.getBoolean("use_volume_keys_for_pages", false)
@@ -1832,7 +1840,5 @@ class Prefs(val context: Context) {
         private const val NOTIFICATIONS_ENABLED = "notifications_enabled"
         private const val NOTIFICATIONS_FONT = "notifications_font"
         private const val NOTIFICATIONS_TEXT_SIZE = "notifications_text_size"
-        private const val NOTIFICATIONS_PER_PAGE = "notifications_per_page"
-        private const val ENABLE_BOTTOM_NAV = "enable_bottom_nav"
     }
 }

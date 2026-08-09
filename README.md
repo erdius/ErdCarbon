@@ -1,3 +1,7 @@
+# ErdCarbon
+
+ErdCarbon is a fork of [inkOS](https://github.com/gezimos/inkOS) by Gëzim Os -- a text-based, e-ink friendly Android launcher built for minimal/dumbphone devices (Mudita Kompakt, LightPhone 3, QIN F22, Cat S22 flip, and others).
+
 <div style="text-align: center;">
 	<img src="docs/img/inkos.svg" alt="inkOS logo" height="48">
 	<h2>inkOS - Text based & E-ink friendly Android Launcher </h2>

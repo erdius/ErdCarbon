@@ -102,7 +102,7 @@ class GuideFragment : Fragment() {
 object GuideScreen {
 
     enum class GuideCategory(val totalPages: Int) {
-        Touch(4), DPadT9(2), Qwerty(1), Search(2)
+        Touch(4), Qwerty(1), Search(2)
     }
 
     @Composable
@@ -188,10 +188,6 @@ object GuideScreen {
                             2 -> HomeNotificationsPageContent(titleFontSize, bodyFontSize, screenScale, textColor)
                             3 -> WidgetsPageContent(titleFontSize, bodyFontSize, screenScale, textColor)
                         }
-                        GuideCategory.DPadT9 -> when (page) {
-                            0 -> DPadHomePageContent(titleFontSize, bodyFontSize, screenScale, textColor)
-                            1 -> DPadLettersPageContent(titleFontSize, bodyFontSize, screenScale, textColor)
-                        }
                         GuideCategory.Qwerty -> QwertyPageContent(titleFontSize, bodyFontSize, screenScale, textColor)
                         GuideCategory.Search -> when (page) {
                             0 -> SearchPage1Content(titleFontSize, bodyFontSize, screenScale, textColor)
@@ -209,11 +205,6 @@ object GuideScreen {
                                 1 -> "HOME GESTURES"
                                 2 -> "HOME NOTIFICATIONS"
                                 3 -> "HOME WIDGETS"
-                                else -> ""
-                            }
-                            GuideCategory.DPadT9 -> when (page) {
-                                0 -> "HOME SCREEN"
-                                1 -> "LETTERS"
                                 else -> ""
                             }
                             GuideCategory.Qwerty -> "QWERTY"
@@ -524,7 +515,6 @@ object GuideScreen {
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(20.dp.scaled(screenScale))) {
             MenuRow(Icons.Rounded.TouchApp, "Touch", "Tap-driven interactions", titleFontSize, bodyFontSize, screenScale, textColor) { onPick(GuideCategory.Touch) }
-            MenuRow(Icons.Rounded.Dialpad, "DPad / T9", "Hardware keys & dialpad", titleFontSize, bodyFontSize, screenScale, textColor) { onPick(GuideCategory.DPadT9) }
             MenuRow(Icons.Rounded.Keyboard, "Qwerty", "Typing & nav mode", titleFontSize, bodyFontSize, screenScale, textColor) { onPick(GuideCategory.Qwerty) }
             MenuRow(Icons.Rounded.Search, "Search", "Apps, contacts, files, web, and more", titleFontSize, bodyFontSize, screenScale, textColor) { onPick(GuideCategory.Search) }
         }
@@ -575,36 +565,6 @@ object GuideScreen {
     }
 
     @Composable
-    private fun DPadHomePageContent(
-        titleFontSize: androidx.compose.ui.unit.TextUnit,
-        bodyFontSize: androidx.compose.ui.unit.TextUnit,
-        screenScale: Float,
-        textColor: androidx.compose.ui.graphics.Color
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(20.dp.scaled(screenScale))) {
-            GuideItem(Icons.Rounded.Apps, "Long-press 9", "Open Quick Menu", titleFontSize, bodyFontSize, screenScale, textColor)
-            GuideItem(Icons.Rounded.TouchApp, "Long-press DPad center", "To choose or replace shortcuts", titleFontSize, bodyFontSize, screenScale, textColor)
-            GuideItem(Icons.Rounded.SwipeVertical, "DPad up / down", "Move between apps and home pages", titleFontSize, bodyFontSize, screenScale, textColor)
-            GuideItem(Icons.Rounded.SwapHoriz, "DPad left / right", "Trigger configured swipe actions", titleFontSize, bodyFontSize, screenScale, textColor)
-        }
-    }
-
-    @Composable
-    private fun DPadLettersPageContent(
-        titleFontSize: androidx.compose.ui.unit.TextUnit,
-        bodyFontSize: androidx.compose.ui.unit.TextUnit,
-        screenScale: Float,
-        textColor: androidx.compose.ui.graphics.Color
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(20.dp.scaled(screenScale))) {
-            GuideItem(Icons.Rounded.OpenInNew, "DPad center / Enter / 3", "Open the focused notification", titleFontSize, bodyFontSize, screenScale, textColor)
-            GuideItem(Icons.Rounded.Close, "Backspace / Menu / 1", "Dismiss the focused notification", titleFontSize, bodyFontSize, screenScale, textColor)
-            GuideItem(Icons.Rounded.ClearAll, "Long-press (touch only)", "Dismiss all notifications", titleFontSize, bodyFontSize, screenScale, textColor)
-            GuideItem(Icons.Rounded.SwipeVertical, "DPad up / down", "Move between notifications", titleFontSize, bodyFontSize, screenScale, textColor)
-        }
-    }
-
-    @Composable
     private fun QwertyPageContent(
         titleFontSize: androidx.compose.ui.unit.TextUnit,
         bodyFontSize: androidx.compose.ui.unit.TextUnit,
@@ -613,7 +573,6 @@ object GuideScreen {
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(20.dp.scaled(screenScale))) {
             GuideItem(Icons.Rounded.Search, "Search from home", "Just start typing from homescreen", titleFontSize, bodyFontSize, screenScale, textColor)
-            GuideItem(Icons.Rounded.Keyboard, "Navigate with DPad", "Using keyboards such as Pastiera navmode.", titleFontSize, bodyFontSize, screenScale, textColor)
         }
     }
 

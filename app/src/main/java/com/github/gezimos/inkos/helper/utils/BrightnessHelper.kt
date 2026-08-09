@@ -14,7 +14,7 @@ object BrightnessHelper {
             context.startActivity(intent)
             Toast.makeText(
                 context,
-                "Please enable 'Modify system settings' for inkOS to use brightness gesture. This is a feature for Mudita Kompakt.",
+                "Please enable 'Modify system settings' for ErdCarbon to use brightness gesture. This is a feature for Mudita Kompakt.",
                 Toast.LENGTH_LONG
             ).show()
             return

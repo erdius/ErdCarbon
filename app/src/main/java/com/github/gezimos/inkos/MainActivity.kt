@@ -224,7 +224,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     interface PageNavigationHandler {
-        val handleDpadAsPage: Boolean
         fun pageUp()
         fun pageDown()
     }
@@ -282,19 +281,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // --- DPAD / PAGE keys ---
-            if (event.action == KeyEvent.ACTION_DOWN && handler.handleDpadAsPage) {
-                when (event.keyCode) {
-                    KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_PAGE_UP -> {
-                        handler.pageUp()
-                        return true
-                    }
-                    KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_PAGE_DOWN -> {
-                        handler.pageDown()
-                        return true
-                    }
-                }
-            }
         }
 
         val superHandled = super.dispatchKeyEvent(event)
@@ -337,8 +323,8 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         if (isOnboarding()) return
         super.onNewIntent(intent)
-        if (intent.getBooleanExtra("OPEN_SIMPLE_TRAY", false)) {
-            navigateToSimpleTray()
+        if (intent.getBooleanExtra("OPEN_NOTIFICATIONS", false)) {
+            navigateToLetters()
             return
         }
         if (!::navController.isInitialized) return
@@ -349,14 +335,6 @@ class MainActivity : AppCompatActivity() {
             }
             Constants.ACTION_OPEN_NOTIFICATIONS -> {
                 try { navController.navigate(R.id.lettersFragment) } catch (_: Exception) {}
-                return
-            }
-            Constants.ACTION_OPEN_SIMPLE_TRAY -> {
-                try { navController.navigate(R.id.simpleTrayFragment) } catch (_: Exception) {}
-                return
-            }
-            Constants.ACTION_OPEN_HUB -> {
-                try { navController.navigate(R.id.hubFragment) } catch (_: Exception) {}
                 return
             }
             Constants.ACTION_OPEN_RECENTS -> {
@@ -373,11 +351,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToSimpleTray() {
+    private fun navigateToLetters() {
         if (!::navController.isInitialized) return
         try {
             navController.popBackStack(R.id.mainFragment, false)
-            navController.navigate(R.id.simpleTrayFragment)
+            navController.navigate(R.id.lettersFragment)
         } catch (_: Exception) {}
     }
 
@@ -515,6 +493,16 @@ class MainActivity : AppCompatActivity() {
         if (prefs.firstOpen) {
             if (com.github.gezimos.inkos.helper.device.DeviceHelper.isEinkDevice()) {
                 prefs.appTheme = Constants.Theme.Light
+                // Auto-refresh (flash) on navigation clears e-ink ghosting without
+                // requiring a manual double-tap; reasonable for any e-ink device.
+                prefs.einkRefreshEnabled = true
+            }
+            if (EinkHelper.isMuditaKompakt()) {
+                // Mudita's own native panel driver control, Kompakt-exclusive and
+                // disabled by default upstream. CLEAR is a reasoned pick (full-refresh
+                // oriented); easy to change via Settings > E-ink Auto Mode if a
+                // different mode ends up looking better in practice.
+                prefs.einkHelperMode = EinkHelper.MEINK_MODE_CLEAR
             }
             navController.navigate(R.id.onboardingFragment)
         }

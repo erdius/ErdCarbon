@@ -55,7 +55,7 @@ class NotificationWidget : AppWidgetProvider() {
 
             val raw = NotificationService.sbnState.value
             val prefsLocal = Prefs(context)
-            val allowed = if (prefsLocal.allowedSimpleTrayApps.isNotEmpty()) prefsLocal.allowedSimpleTrayApps else prefsLocal.allowedNotificationApps
+            val allowed = prefsLocal.allowedNotificationApps
             val filtered = raw.filter { sbn ->
                 sbn.notification.category != Notification.CATEGORY_TRANSPORT &&
                         !notificationManager.isNotificationSummary(sbn) &&
@@ -86,9 +86,9 @@ class NotificationWidget : AppWidgetProvider() {
 
             val views = RemoteViews(context.packageName, R.layout.notification_widget)
 
-            // Tap opens SimpleTray
+            // Tap opens Letters
             val launchIntent = Intent(context, MainActivity::class.java).apply {
-                putExtra("OPEN_SIMPLE_TRAY", true)
+                putExtra("OPEN_NOTIFICATIONS", true)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             val pendingIntent = PendingIntent.getActivity(

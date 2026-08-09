@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -340,11 +341,11 @@ object OnboardingScreen {
                         Spacer(modifier = Modifier.height(24.dp.scaled(screenScale)))
                         Text(
                             text = when (page) {
-                                0 -> "A distraction-free interface for clarity and focus. Optimized for e-ink devices, QWERTY and T9 phones."
-                                1 -> "inkOS does not collect, store, or share any data. There are no server connections and no tracking. Everything stays on your device."
-                                2 -> "To get the most out of inkOS, grant notification permissions so inkOS can forward you Android notifications in Home, Letters or Simple Tray."
-                                3 -> "To make inkOS your new app home, set it as a default launcher. You can change this later in Settings."
-                                4 -> "To access settings, Pinch (zoom out) in home (empty areas) to open the quick settings. That will allow you to access All Settings or enable Edit Mode for the front-end editor."
+                                0 -> "A distraction-free interface for clarity and focus. Optimized for the Mudita Kompakt."
+                                1 -> "ErdCarbon does not collect, store, or share any data. There are no server connections and no tracking. Everything stays on your device."
+                                2 -> "To get the most out of ErdCarbon, grant notification permissions so ErdCarbon can forward you Android notifications in Home, Letters or Simple Tray."
+                                3 -> "To make ErdCarbon your new app home, set it as a default launcher. You can change this later in Settings."
+                                4 -> "To access settings, tap the gear icon in the corner of your home screen. That will allow you to access All Settings or enable Edit Mode for the front-end editor. You can move the icon to a different corner in Settings."
                                 5 -> "Choose a color preset for your launcher, or skip to keep your current theme and start from scratch."
                                 6 -> "Select your home shortcuts and order them using Edit Favorites. You can still longpress on single apps in home to replace them individually like before."
                                 else -> ""
@@ -355,22 +356,13 @@ object OnboardingScreen {
                             color = textColor
                         )
 
-                        // Pinch animation on settings page
+                        // Settings gear icon illustration on settings page
                         if (page == 4) {
                             Spacer(modifier = Modifier.height(32.dp.scaled(screenScale)))
-                            var pinchFrame by remember { mutableIntStateOf(0) }
-                            LaunchedEffect(Unit) {
-                                while (true) {
-                                    kotlinx.coroutines.delay(600)
-                                    pinchFrame = (pinchFrame + 1) % 2
-                                }
-                            }
-                            androidx.compose.foundation.Image(
-                                painter = androidx.compose.ui.res.painterResource(
-                                    if (pinchFrame == 0) R.drawable.pinch1 else R.drawable.pinch2
-                                ),
+                            Icon(
+                                imageVector = Icons.Rounded.Settings,
                                 contentDescription = null,
-                                colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(textColor),
+                                tint = textColor,
                                 modifier = Modifier.size(48.dp.scaled(screenScale))
                             )
                             Spacer(modifier = Modifier.weight(1f))

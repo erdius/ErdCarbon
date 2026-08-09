@@ -435,10 +435,6 @@ class AppsRepository(application: Application) {
                         }
                         Constants.INKOS_SHORTCUT_NOTIFICATIONS ->
                             fragment.findNavController().navigate(R.id.lettersFragment)
-                        Constants.INKOS_SHORTCUT_SIMPLE_TRAY ->
-                            fragment.findNavController().navigate(R.id.simpleTrayFragment)
-                        Constants.INKOS_SHORTCUT_HUB ->
-                            fragment.findNavController().navigate(R.id.hubFragment)
                         Constants.INKOS_SHORTCUT_RECENTS ->
                             fragment.findNavController().navigate(R.id.recentsFragment)
                         Constants.INKOS_SHORTCUT_SETTINGS ->

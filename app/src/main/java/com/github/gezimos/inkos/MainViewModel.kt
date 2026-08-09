@@ -41,7 +41,6 @@ data class HomeUiState(
     val showDate: Boolean = true,
     val showDateBatteryCombo: Boolean = false,
     val showNotificationCount: Boolean = false,
-    val notificationCountSource: Int = 0, // 0 = SimpleTray, 1 = Letters
     val showQuote: Boolean = false,
     val showAmPm: Boolean = true,
     val showSecondClock: Boolean = false,
@@ -81,6 +80,9 @@ data class HomeUiState(
     val dateAlignment: Int = 0,
     val quoteAlignment: Int = 0,
     val homeAppsYOffset: Int = 0,
+    val quickMenuIconPosition: Int = 3,
+    val appDrawerIconPosition: Int = 0,
+    val searchIconPosition: Int = 2,
 
     val bottomWidgetHeightPx: Int = 0,
     val screenHeightDp: Int = 0,
@@ -117,10 +119,6 @@ data class HomeUiState(
     val clearConversationOnAppOpen: Boolean = false,
     val allowedBadgeNotificationApps: Set<String> = emptySet(),
     val allowedNotificationApps: Set<String> = emptySet(),
-    val allowedSimpleTrayApps: Set<String> = emptySet(),
-    // SimpleTray Settings
-    val notificationsPerPage: Int = 3,
-    val enableBottomNav: Boolean = true,
     // Extras Settings
     val einkRefreshEnabled: Boolean = false,
     val einkRefreshHomeButtonOnly: Boolean = false,
@@ -376,7 +374,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         showDate = prefs.showDate,
         showDateBatteryCombo = prefs.showDateBatteryCombo,
         showNotificationCount = prefs.showNotificationCount,
-        notificationCountSource = prefs.notificationCountSource,
         showQuote = prefs.showQuote,
         showAmPm = prefs.showAmPm,
         showSecondClock = prefs.showSecondClock,
@@ -413,6 +410,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         dateAlignment = prefs.homeDateAlignment,
         quoteAlignment = prefs.homeQuoteAlignment,
         homeAppsYOffset = prefs.homeAppsYOffset,
+        quickMenuIconPosition = prefs.quickMenuIconPosition,
+        appDrawerIconPosition = prefs.appDrawerIconPosition,
+        searchIconPosition = prefs.searchIconPosition,
         screenHeightDp = (appContext.resources.displayMetrics.heightPixels / appContext.resources.displayMetrics.density).toInt(),
 
         topWidgetMargin = prefs.topWidgetMargin,
@@ -462,10 +462,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         clearConversationOnAppOpen = prefs.clearConversationOnAppOpen,
         allowedBadgeNotificationApps = prefs.allowedBadgeNotificationApps,
         allowedNotificationApps = prefs.allowedNotificationApps,
-        allowedSimpleTrayApps = prefs.allowedSimpleTrayApps,
-        // SimpleTray Settings
-        notificationsPerPage = prefs.notificationsPerPage,
-        enableBottomNav = prefs.enableBottomNav,
         // Extras Settings
         einkRefreshEnabled = prefs.einkRefreshEnabled,
         einkRefreshHomeButtonOnly = prefs.einkRefreshHomeButtonOnly,
@@ -541,8 +537,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val notifications = values[1] as Map<String, NotificationManager.NotificationInfo>
         val mediaInfo = values[3] as? AudioWidgetHelper.MediaPlayerInfo
         @Suppress("UNCHECKED_CAST")
-        val rawNotifications = values[4] as List<android.service.notification.StatusBarNotification>
-        @Suppress("UNCHECKED_CAST")
         val iconCodes = values[5] as Map<String, String>
         val clock = values[7] as ClockState
         val appsPerPage = if (homeUi.homePagesNum > 0) {
@@ -551,29 +545,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             homeUi.homeApps.size.coerceAtLeast(1)
         }
         
-        // Compute notification count from selected source
-        val notificationCount = when (homeUi.notificationCountSource) {
-            1 -> {
-                @Suppress("UNCHECKED_CAST")
-                val conversations = values[2] as Map<String, List<NotificationManager.ConversationNotification>>
-                val allowed = homeUi.allowedNotificationApps
-                conversations.entries.sumOf { (pkg, list) ->
-                    if (allowed.isEmpty() || allowed.contains(pkg)) list.size else 0
-                }
-            }
-            else -> {
-                // SimpleTray: count live system notifications
-                val allowed = homeUi.allowedSimpleTrayApps
-                val notificationManager = NotificationManager.getInstance(appContext)
-                val notificationsFromSbn = rawNotifications.count { sbn ->
-                    if (sbn.notification.category == android.app.Notification.CATEGORY_TRANSPORT) {
-                        return@count false
-                    }
-                    !notificationManager.isNotificationSummary(sbn) &&
-                    (allowed.isEmpty() || allowed.contains(sbn.packageName))
-                }
-                val mediaCount = if (mediaInfo != null && (allowed.isEmpty() || allowed.contains(mediaInfo.packageName))) 1 else 0
-                notificationsFromSbn + mediaCount
+        // Compute notification count from tracked conversations (Letters)
+        val notificationCount = run {
+            @Suppress("UNCHECKED_CAST")
+            val conversations = values[2] as Map<String, List<NotificationManager.ConversationNotification>>
+            val allowed = homeUi.allowedNotificationApps
+            conversations.entries.sumOf { (pkg, list) ->
+                if (allowed.isEmpty() || allowed.contains(pkg)) list.size else 0
             }
         }
         
@@ -616,6 +594,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             clockAlignment = homeUi.clockAlignment,
             dateAlignment = homeUi.dateAlignment,
             quoteAlignment = homeUi.quoteAlignment,
+            quickMenuIconPosition = homeUi.quickMenuIconPosition,
+            appDrawerIconPosition = homeUi.appDrawerIconPosition,
+            searchIconPosition = homeUi.searchIconPosition,
             homeAppsYOffset = homeUi.homeAppsYOffset,
             maxHomeAppsYOffset = homeUi.maxHomeAppsYOffset,
 
@@ -976,7 +957,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             PrefKeys.CLOCK_STYLE -> currentState.copy(clockStyle = prefs.clockStyle)
             PrefKeys.SHOW_DATE_BATTERY_COMBO -> currentState.copy(showDateBatteryCombo = prefs.showDateBatteryCombo)
             PrefKeys.SHOW_NOTIFICATION_COUNT -> currentState.copy(showNotificationCount = prefs.showNotificationCount)
-            PrefKeys.NOTIFICATION_COUNT_SOURCE -> currentState.copy(notificationCountSource = prefs.notificationCountSource)
             PrefKeys.BACKGROUND_OPACITY -> currentState.copy(backgroundOpacity = prefs.backgroundOpacity)
             // Update new fields
             PrefKeys.HOME_ALIGNMENT -> currentState.copy(homeAlignment = prefs.homeAlignment)
@@ -1437,11 +1417,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setShowNotificationCount(visibility: Boolean) {
         _homeUiState.value = _homeUiState.value.copy(showNotificationCount = visibility)
         prefs.showNotificationCount = visibility
-    }
-
-    fun setNotificationCountSource(source: Int) {
-        _homeUiState.value = _homeUiState.value.copy(notificationCountSource = source)
-        prefs.notificationCountSource = source
     }
 
     fun setShowAudioWidget(visibility: Boolean) {
@@ -1987,11 +1962,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         NotificationManager.getInstance(appContext).refreshConversationNotificationState()
     }
 
-    fun setAllowedSimpleTrayApps(apps: Set<String>) {
-        prefs.allowedSimpleTrayApps = apps.toMutableSet()
-        _homeUiState.value = _homeUiState.value.copy(allowedSimpleTrayApps = apps)
-    }
-
     fun setTopWidgetMargin(margin: Int) {
         prefs.topWidgetMargin = margin
         _homeUiState.value = _homeUiState.value.copy(topWidgetMargin = margin)
@@ -2168,6 +2138,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setHomeAlignment(alignment: Int) {
         prefs.homeAlignment = alignment
         _homeUiState.value = _homeUiState.value.copy(homeAlignment = alignment)
+    }
+
+    fun setQuickMenuIconPosition(position: Int) {
+        prefs.quickMenuIconPosition = position
+        _homeUiState.value = _homeUiState.value.copy(quickMenuIconPosition = position)
+    }
+
+    fun setAppDrawerIconPosition(position: Int) {
+        prefs.appDrawerIconPosition = position
+        _homeUiState.value = _homeUiState.value.copy(appDrawerIconPosition = position)
+    }
+
+    fun setSearchIconPosition(position: Int) {
+        prefs.searchIconPosition = position
+        _homeUiState.value = _homeUiState.value.copy(searchIconPosition = position)
     }
 
     fun setHomeClockAlignment(alignment: Int) {
@@ -2648,16 +2633,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setBackgroundOpacity(opacity: Int) {
         prefs.backgroundOpacity = opacity
         _homeUiState.value = _homeUiState.value.copy(backgroundOpacity = opacity)
-    }
-
-    fun setNotificationsPerPage(pageCount: Int) {
-        prefs.notificationsPerPage = pageCount
-        _homeUiState.value = _homeUiState.value.copy(notificationsPerPage = pageCount)
-    }
-
-    fun setEnableBottomNav(enabled: Boolean) {
-        prefs.enableBottomNav = enabled
-        _homeUiState.value = _homeUiState.value.copy(enableBottomNav = enabled)
     }
 
 }

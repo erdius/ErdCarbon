@@ -18,4 +18,4 @@ dependencyResolutionManagement {
 }
 
 include(":app")
-rootProject.name = "inkOS"
+rootProject.name = "ErdCarbon"

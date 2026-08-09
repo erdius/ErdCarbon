@@ -4,10 +4,8 @@
     <!-- Static shortcut labels -->
     <string name="shortcut_app_drawer_short">App Drawer</string>
     <string name="shortcut_letters_short">Letters</string>
-    <string name="shortcut_simple_tray_short">Simple Tray</string>
-    <string name="shortcut_hub_short">Hub</string>
     <string name="shortcut_recents_short">Recents</string>
-    <string name="shortcut_settings_short">inkOS Settings</string>
+    <string name="shortcut_settings_short">ErdCarbon Settings</string>
     <string name="shortcut_tab_apps">Apps</string>
     <string name="shortcut_tab_pinned">Pinned</string>
 
@@ -95,7 +93,7 @@
     <string name="settings_gestures_title">Gestures</string>
     <string name="settings_hidden_apps_title">Hidden Apps</string>
     <string name="settings_advanced_title">Advanced</string>
-    <string name="settings_exit_inkos_title">Exit inkOS</string>
+    <string name="settings_exit_inkos_title">Exit ErdCarbon</string>
     <string name="fonts_settings_title">Typography</string>
     <string name="look_feel_settings_title">Look &amp; Feel</string>
     <string name="gestures_settings_title">Gestures</string>
@@ -113,7 +111,6 @@
     <string name="visibility_display">Visibility &amp; Display</string>
     <string name="element_colors">Colors</string>
     <string name="donate">Donate</string>
-    <string name="community">Community</string>
     <string name="about">About</string>
     <string name="desc_about">Credits &amp; support</string>
     <string name="tooltip_pinch_settings">Pinch in empty areas to open Settings</string>
@@ -139,6 +136,15 @@
     <string name="extend_home_apps_area">Extend Clickable Area</string>
     <string name="home_alignment">Home Alignment</string>
     <string name="home_apps_alignment">Home Apps Alignment</string>
+    <string name="quick_menu_icon_position">Quick Menu Icon Position</string>
+    <string name="app_drawer_icon_position">App Drawer Icon Position</string>
+    <string name="search_icon_position">Search Icon Position</string>
+    <string name="corner_top_left">Top Left</string>
+    <string name="corner_top_right">Top Right</string>
+    <string name="corner_bottom_left">Bottom Left</string>
+    <string name="corner_bottom_right">Bottom Right</string>
+    <string name="corner_bottom_middle">Bottom Middle</string>
+    <string name="icon_hidden">Hidden</string>
     <string name="home_clock_alignment">Clock alignment</string>
     <string name="home_date_alignment">Date alignment</string>
     <string name="home_quote_alignment">Widget alignment</string>
@@ -219,15 +225,8 @@
     <string name="chat_notifications_section">Chat Notifications</string>
     <string name="home_notifications_allowlist">Home Noti. Allowlist</string>
     <string name="notification_permission_enabled">Notification access on</string>
-    <string name="notifications_per_page">Notifications Per Page</string>
-    <string name="enable_bottom_navigation">Enable Bottom Navigation</string>
     <string name="no_notifications">No notifications</string>
     <string name="letters_screen_title">Letters</string>
-    <string name="simple_tray_title">Simple Tray</string>
-    <string name="simple_tray_allowlist">Simple Tray Allowlist</string>
-    <string name="simple_tray_apps">Simple Tray Apps</string>
-    <string name="hub_allowlist">Hub Allowlist</string>
-    <string name="hub_apps">Hub Apps</string>
 
     <!-- App drawer -->
     <string name="app_drawer">App Drawer</string>
@@ -336,7 +335,7 @@
 
     <!-- Gesture actions -->
     <string name="open_app">Apps</string>
-    <string name="gesture_tab_inkos">inkOS</string>
+    <string name="gesture_tab_inkos">ErdCarbon</string>
     <string name="gesture_tab_system">System</string>
     <string name="private_space">Private Spaces</string>
     <string name="next_page">Go to Next Page</string>
@@ -378,8 +377,6 @@
     <string name="guide">Guide</string>
     <string name="buy_me_a_coffee">Buy Me a Coffee</string>
     <string name="github_sponsors">GitHub Sponsors</string>
-    <string name="report_issues">Report Issues</string>
-    <string name="reddit_inkos">Reddit — r/inkos</string>
     <string name="font_license_ofl">Font License (OFL)</string>
     <string name="credits">Credits</string>
 
@@ -387,7 +384,7 @@
     <string name="app_shortcuts">App Shortcuts</string>
     <string name="shortcuts_selected">%1$d selected</string>
     <string name="no_app_shortcuts">No app shortcuts available</string>
-    <string name="no_inkos_shortcuts">No inkOS shortcuts</string>
+    <string name="no_inkos_shortcuts">No ErdCarbon shortcuts</string>
     <string name="no_pinned_shortcuts">No pinned shortcuts. Pinned shortcuts can be created from Browsers (like chrome/firefox/brave) or from other apps like Activity launcher.</string>
     <string name="system_shortcuts_search_hint">System shortcuts are now available via Search. Enable Settings search in App Drawer / Search settings.</string>
     <string name="shortcut_icon">Shortcut Icon</string>
@@ -445,9 +442,6 @@
     <string name="option_date_format_3">Mar 5</string>
     <string name="option_date_format_4">5 Mar</string>
     <string name="option_date_format_5">Wednesday</string>
-    <string name="option_simple_tray">SimpleTray</string>
-    <string name="option_letters">Letters</string>
-    <string name="option_hub">Hub</string>
     <string name="option_pill">Pill</string>
     <string name="option_rounded">Rounded</string>
     <string name="option_square">Square</string>
@@ -496,14 +490,14 @@
     <string name="wallpaper_visibility">Wallpaper Visibility</string>
     <string name="wallpaper_set">APPLY</string>
     <string name="set_wallpaper_for">Set wallpaper for</string>
-    <string name="wallpaper_inkos">inkOS</string>
+    <string name="wallpaper_inkos">ErdCarbon</string>
     <string name="wallpaper_android">Android</string>
     <string name="wallpaper_home_screen">Home Screen</string>
     <string name="wallpaper_lock_screen">Lock Screen</string>
     <string name="wallpaper_both">Both</string>
-    <string name="about_inkos_wallpaper">About inkOS Wallpaper</string>
-    <string name="what_is_inkos_wallpaper">What is inkOS Wallpaper?</string>
-    <string name="inkos_wallpaper_explanation">inkOS wallpaper is a \"faux\" wallpaper, it\'s an image that appears over the actual android wallpaper layer.\n\nIt\'s function it\'s meant to circumvent Android cropping and zooming in your wallpaper which might break the the 1:1 pixel scaling which can cause defect to your image especially if you\'re using an e-ink device.\n\nMake sure to use correct aspect ratio, or have the exact resolution as your display.\n\nSetting an Android wallpaper will automatically clear the inkOS wallpaper.</string>
+    <string name="about_inkos_wallpaper">About ErdCarbon Wallpaper</string>
+    <string name="what_is_inkos_wallpaper">What is ErdCarbon Wallpaper?</string>
+    <string name="inkos_wallpaper_explanation">ErdCarbon wallpaper is a \"faux\" wallpaper, it\'s an image that appears over the actual android wallpaper layer.\n\nIt\'s function it\'s meant to circumvent Android cropping and zooming in your wallpaper which might break the the 1:1 pixel scaling which can cause defect to your image especially if you\'re using an e-ink device.\n\nMake sure to use correct aspect ratio, or have the exact resolution as your display.\n\nSetting an Android wallpaper will automatically clear the ErdCarbon wallpaper.</string>
 
     <!-- Theme config -->
     <string name="theme_config">Theme Config</string>
@@ -530,7 +524,7 @@
 
     <!-- Quick Menu -->
     <string name="quick_menu">QUICK MENU</string>
-    <string name="inkos_settings">inkOS Settings</string>
+    <string name="inkos_settings">ErdCarbon Settings</string>
     <string name="system_settings">System Settings</string>
 
     <!-- Media player -->
@@ -542,7 +536,7 @@
 
     <!-- Private Space -->
     <string name="alert_requires_android_v">This functionality requires Android 15 or later.</string>
-    <string name="toast_private_space_default_home_screen">inkOS needs to be the default home screen to access private space.</string>
+    <string name="toast_private_space_default_home_screen">ErdCarbon needs to be the default home screen to access private space.</string>
     <string name="toast_private_space_locked">Private space locked</string>
     <string name="toast_private_space_unlocked">Private space unlocked</string>
     <string name="toast_private_space_not_available">Private space is not available</string>
@@ -553,29 +547,19 @@
     <string name="toast_work_profile_resumed">Work profile resumed</string>
     <string name="toast_work_profile_not_available">Work profile is not available</string>
 
-    <!-- Hub -->
-    <string name="hub_all">All</string>
-    <string name="hub_messages">Messages</string>
-    <string name="hub_calls">Calls</string>
-    <string name="hub_email">Email</string>
-    <string name="hub_events">Events</string>
-    <string name="hub_other">Other</string>
-    <string name="hub_action">Action</string>
     <string name="hub_open">Open</string>
-    <string name="hub_clear_all">Clear All</string>
-    <string name="hub_clear">Clear</string>
 
     <!-- Privacy Policy -->
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_updated">Last updated: December 2025</string>
     <string name="privacy_no_data_title">No Data Collection</string>
-    <string name="privacy_no_data_body">inkOS does not track you. We cannot collect, store, or share your data because inkOS does not have the capability to access or transmit your personal information.</string>
+    <string name="privacy_no_data_body">ErdCarbon does not track you. We cannot collect, store, or share your data because ErdCarbon does not have the capability to access or transmit your personal information.</string>
     <string name="privacy_no_server_title">No Server Connections</string>
-    <string name="privacy_no_server_body">inkOS does not connect to any servers. All functionality operates entirely on your device. There is no network communication and no external connections.</string>
+    <string name="privacy_no_server_body">ErdCarbon does not connect to any servers. All functionality operates entirely on your device. There is no network communication and no external connections.</string>
     <string name="privacy_local_title">Local Data Only</string>
-    <string name="privacy_local_body">inkOS only previews and displays data that already exists on your phone. All app information, notifications, and settings are processed locally. Nothing leaves your device.</string>
+    <string name="privacy_local_body">ErdCarbon only previews and displays data that already exists on your phone. All app information, notifications, and settings are processed locally. Nothing leaves your device.</string>
     <string name="privacy_open_source_title">Open Source</string>
-    <string name="privacy_open_source_body">inkOS is open source. You can review the source code on GitHub to verify these claims.</string>
+    <string name="privacy_open_source_body">ErdCarbon is open source. You can review the source code on GitHub to verify these claims.</string>
     <string name="ofl_title">Open Font License 1.1</string>
 
     <!-- Onboarding -->
@@ -597,8 +581,8 @@
     <string name="onboarding_set_default">SET DEFAULT LAUNCHER</string>
 
     <!-- Accessibility -->
-    <string name="accessibility_service_name">inkOS Actions Service</string>
-    <string name="accessibility_service_description">inkOS uses this accessibility service solely to perform system actions you assign to gestures: lock screen, open recent apps, open quick settings, and open the power dialog. This service does not read, collect, store, or share any screen content, personal data, or user information. No data leaves your device.</string>
+    <string name="accessibility_service_name">ErdCarbon Actions Service</string>
+    <string name="accessibility_service_description">ErdCarbon uses this accessibility service solely to perform system actions you assign to gestures: lock screen, open recent apps, open quick settings, and open the power dialog. This service does not read, collect, store, or share any screen content, personal data, or user information. No data leaves your device.</string>
     <string name="can_not_delete_system_apps">Can\'t Delete System Apps</string>
     <string name="drawer_list_empty_hint">No apps found</string>
     <string name="long_press_for_settings">Long press anywhere for settings</string>
@@ -610,7 +594,7 @@
     <string name="text_authentication_cancel">Authentication Cancel.</string>
     <string name="text_authentication_error">Authentication error: %1$s (code %2$d)</string>
     <string name="text_authentication_failed">Authentication failed.</string>
-    <string name="text_biometric_login">Biometric login inkOS Settings</string>
+    <string name="text_biometric_login">Biometric login ErdCarbon Settings</string>
     <string name="text_biometric_login_app">Biometric login for %1$s</string>
     <string name="text_biometric_login_sub">Log in using your biometric credentials.</string>
 
@@ -656,7 +640,7 @@
     <string name="perm_write_settings_title">Modify System Settings Permission</string>
     <string name="perm_write_settings_body">This app needs permission to modify system settings to control screen brightness. You will be taken to Android settings to grant this permission.</string>
     <string name="perm_notification_title">Notification Access</string>
-    <string name="perm_notification_body">inkOS needs notification access to show your notifications here. You will be taken to Android settings to grant this permission.</string>
+    <string name="perm_notification_body">ErdCarbon needs notification access to show your notifications here. You will be taken to Android settings to grant this permission.</string>
     <string name="bluetooth_permission_required_title">BLUETOOTH PERMISSION REQUIRED:</string>
     <string name="bluetooth_permission_required_body">This particular tool is only useful for Mudita Kompakt or other phones that do not have Bluetooth History. Missing permissions: %1$s. Please grant permissions to use Bluetooth features.</string>
 
@@ -680,8 +664,6 @@
     <string name="desc_extras_settings">Extras &amp; tools</string>
     <string name="desc_buy_coffee">Support with a coffee</string>
     <string name="desc_github_sponsor">Become a GitHub sponsor</string>
-    <string name="desc_report_bugs">Report bugs or features</string>
-    <string name="desc_reddit_community">Join the Reddit community</string>
     <string name="desc_app_version">Tap to view app info</string>
     <string name="desc_font_license">Open Font License</string>
     <string name="desc_open_source">Original Forks</string>
@@ -702,6 +684,9 @@
     <string name="desc_page_indicator">Show page indicator dots</string>
     <string name="desc_page_reset">Always returns to 1st page</string>
     <string name="desc_home_alignment">Align home apps</string>
+    <string name="desc_quick_menu_icon_position">Corner for the Settings icon on home</string>
+    <string name="desc_app_drawer_icon_position">Corner for the App Drawer icon on home</string>
+    <string name="desc_search_icon_position">Corner for the Search icon on home</string>
     <string name="desc_show_clock">Show clock on home</string>
     <string name="desc_clock_format">Choose 12h, 24h, or system</string>
     <string name="desc_clock_style">Visual style of the clock</string>
@@ -713,7 +698,6 @@
     <string name="desc_date_format">Date display format</string>
     <string name="desc_show_battery">Battery % next to date</string>
     <string name="desc_notification_count">Unread notification count</string>
-    <string name="desc_notification_style">Letters or Simple Tray</string>
     <string name="desc_date_alignment">Align date row</string>
     <string name="desc_audio_widget">Media controls on playback</string>
     <string name="desc_bottom_widget">Choose your bottom widget</string>
@@ -807,12 +791,9 @@
     <string name="desc_enable_letters">Enable letters window</string>
     <string name="desc_clear_on_open">Clear on app open</string>
     <string name="desc_letters_filter">Letters app filter</string>
-    <string name="desc_noti_per_page">Notifications per page</string>
-    <string name="desc_bottom_nav">Bottom page navigation</string>
-    <string name="desc_simple_tray_filter">Simple tray app filter</string>
 
     <string name="accessibility_permission_title">Accessibility Permission Required</string>
-    <string name="accessibility_permission_message">inkOS needs accessibility service access to perform this gesture action (lock screen, recent apps, quick settings, or power dialog).\n\nThis service only performs the system action you assigned. It does not read screen content, collect personal data, or transmit any information. All processing stays on your device.\n\nYou will be taken to accessibility settings to enable the inkOS Actions Service.</string>
+    <string name="accessibility_permission_message">ErdCarbon needs accessibility service access to perform this gesture action (lock screen, recent apps, quick settings, or power dialog).\n\nThis service only performs the system action you assigned. It does not read screen content, collect personal data, or transmit any information. All processing stays on your device.\n\nYou will be taken to accessibility settings to enable the ErdCarbon Actions Service.</string>
     <string name="btn_deny">Deny</string>
     <string name="btn_allow">Allow</string>
     <string name="write_settings_permission_title">Modify System Settings</string>

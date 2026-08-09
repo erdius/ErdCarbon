@@ -145,67 +145,6 @@ class LettersFragment : Fragment() {
             view.defaultFocusHighlightEnabled = false
         }
         view.requestFocus()
-
-        view.setOnKeyListener { v, keyCode, event ->
-
-
-            val mapped = com.github.gezimos.inkos.ui.compose.NavHelper.mapNotificationsKey(prefs, keyCode, event)
-            if (mapped == com.github.gezimos.inkos.ui.compose.NavHelper.NotificationKeyAction.None) return@setOnKeyListener false
-
-            if (mapped == com.github.gezimos.inkos.ui.compose.NavHelper.NotificationKeyAction.PageUp || mapped == com.github.gezimos.inkos.ui.compose.NavHelper.NotificationKeyAction.PageDown) {
-                return@setOnKeyListener false
-            }
-
-            val composeView = v as? ComposeView
-            val pagerState = composeView?.getTag(0xdeadbeef.toInt()) as? androidx.compose.foundation.pager.PagerState
-            val coroutineScope = composeView?.getTag(0xcafebabe.toInt()) as? kotlinx.coroutines.CoroutineScope
-            val validNotifications = (composeView?.getTag(0xabcdef01.toInt()) as? List<*>)
-                ?.filterIsInstance<Pair<String, NotificationManager.ConversationNotification>>()
-
-            if (pagerState == null || coroutineScope == null || validNotifications == null) {
-                android.util.Log.d("LettersFragment", "pagerState, coroutineScope, or validNotifications is null")
-                return@setOnKeyListener false
-            }
-
-            when (mapped) {
-                com.github.gezimos.inkos.ui.compose.NavHelper.NotificationKeyAction.Dismiss -> {
-                    // Dismiss current notification
-                    val (pkg, notif) = validNotifications.getOrNull(pagerState.currentPage) ?: return@setOnKeyListener true
-                    if (notif.notificationKey != null) {
-                        com.github.gezimos.inkos.services.NotificationService.dismissNotification(notif.notificationKey)
-                    }
-                    // Remove from conversation notifications
-                    NotificationManager.getInstance(requireContext())
-                        .removeConversationNotification(pkg, notif.conversationId)
-                    coroutineScope.launch {
-                        val nextPage = when {
-                            pagerState.currentPage == validNotifications.lastIndex && pagerState.currentPage > 0 -> pagerState.currentPage - 1
-                            pagerState.currentPage < validNotifications.lastIndex -> pagerState.currentPage
-                            else -> 0
-                        }
-                        kotlinx.coroutines.delay(150)
-                        if (validNotifications.size > 1) {
-                            pagerState.scrollToPage(nextPage)
-                        }
-                    }
-                    true
-                }
-                com.github.gezimos.inkos.ui.compose.NavHelper.NotificationKeyAction.Open -> {
-                    val (pkg, notif) = validNotifications.getOrNull(pagerState.currentPage) ?: return@setOnKeyListener true
-                    NotificationManager.getInstance(requireContext())
-                        .openNotification(pkg, notif.notificationKey, notif.conversationId, removeAfterOpen = true)
-                    // Navigate to previous page if needed
-                    coroutineScope.launch {
-                        val currentPage = pagerState.currentPage
-                        if (currentPage >= validNotifications.size - 1 && currentPage > 0) {
-                            pagerState.scrollToPage(currentPage - 1)
-                        }
-                    }
-                    true
-                }
-                else -> false
-            }
-        }
     }
 
     override fun onResume() {
@@ -233,8 +172,6 @@ class LettersFragment : Fragment() {
         }
         
         act.pageNavigationHandler = object : com.github.gezimos.inkos.MainActivity.PageNavigationHandler {
-            override val handleDpadAsPage: Boolean = true
-
             override fun pageUp() {
                 val composeView = view as? ComposeView ?: return
                 val pagerState = composeView.getTag(0xdeadbeef.toInt()) as? androidx.compose.foundation.pager.PagerState
@@ -302,7 +239,7 @@ class LettersFragment : Fragment() {
                 hasShownNotifDialog = true
                 showPermissionExplanationDialog(
                     title = getString(R.string.perm_notification_title),
-                    message = "inkOS needs notification access to show your notifications here. You will be taken to Android settings to grant this permission.",
+                    message = "ErdCarbon needs notification access to show your notifications here. You will be taken to Android settings to grant this permission.",
                     onContinue = {
                         try {
                             ctx.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))

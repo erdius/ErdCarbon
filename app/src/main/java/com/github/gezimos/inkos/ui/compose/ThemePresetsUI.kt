@@ -57,10 +57,6 @@ import com.github.gezimos.inkos.data.Prefs
 import com.github.gezimos.inkos.data.ThemePreset
 import com.github.gezimos.inkos.data.ThemePresets
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.focusable
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import com.github.gezimos.inkos.R
 import com.github.gezimos.inkos.helper.ShapeHelper
 import com.github.gezimos.inkos.style.SettingsTheme
@@ -88,9 +84,6 @@ fun ThemePresetPicker(
     onConfigClick: () -> Unit = {},
     einkMode: Boolean = false,
     currentIndexState: MutableIntState = remember { mutableIntStateOf(0) },
-    focusZone: MutableState<ThemePresetFocusZone> = remember { mutableStateOf(ThemePresetFocusZone.CARD) },
-    bottomRowIndex: MutableIntState = remember { mutableIntStateOf(0) },
-    isDpadMode: Boolean = false,
     selectAction: MutableState<(() -> Unit)?> = remember { mutableStateOf(null) },
     applyColors: MutableState<Boolean> = remember { mutableStateOf(true) },
     applyFont: MutableState<Boolean> = remember { mutableStateOf(true) },
@@ -489,7 +482,7 @@ fun ThemePresetPicker(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Left: config (opens bottom sheet)
-                val configHighlighted = isDpadMode && focusZone.value == ThemePresetFocusZone.BOTTOM_ROW && bottomRowIndex.intValue == 0
+                val configHighlighted = false
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -539,7 +532,7 @@ fun ThemePresetPicker(
                     )
 
                     // Right: Apply
-                    val applyHighlighted = isDpadMode && focusZone.value == ThemePresetFocusZone.BOTTOM_ROW && bottomRowIndex.intValue == 1
+                    val applyHighlighted = false
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -648,12 +641,7 @@ fun ThemePresetsPage(
         )
     }
 
-    // DPAD state
-    val focusZone = remember { mutableStateOf(ThemePresetFocusZone.CARD) }
-    val headerIndex = remember { mutableIntStateOf(0) }
-    val bottomRowIndex = remember { mutableIntStateOf(0) }
     val currentIndexState = remember { mutableIntStateOf(0) }
-    var isDpadMode by remember { mutableStateOf(false) }
     val selectAction = remember { mutableStateOf<(() -> Unit)?>(null) }
     // Skip options state
     val applyColors = remember { mutableStateOf(true) }
@@ -675,12 +663,6 @@ fun ThemePresetsPage(
             )
         }
     }
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(200)
-        try { focusRequester.requestFocus() } catch (_: Exception) {}
-    }
-
     SettingsTheme(isDark) {
         val screenScale = rememberScreenScale()
         val prefTextColor = Theme.colors.text
@@ -689,44 +671,6 @@ fun ThemePresetsPage(
             modifier = Modifier
                 .fillMaxSize()
                 .background(prefBackgroundColor)
-                .focusRequester(focusRequester)
-                .focusable()
-                .onPreviewKeyEvent { event ->
-                    NavHelper.handleThemePresetKeyEvent(
-                        keyEvent = event,
-                        isDpadModeSetter = { isDpadMode = it },
-                        focusZone = focusZone,
-                        headerIndex = headerIndex,
-                        bottomRowIndex = bottomRowIndex,
-                        currentIndex = currentIndexState,
-                        presetsLastIndex = ThemePresets.PRESETS.lastIndex,
-                        hasSelectButton = true,
-                        headerMaxIndex = 2,
-                        onBackClick = onBackClick,
-                        onHeaderAction = { index ->
-                            when (index) {
-                                1 -> einkMode.value = !einkMode.value
-                                2 -> {
-                                    val newMode = when (currentThemeMode) {
-                                        Constants.Theme.Light -> Constants.Theme.Dark
-                                        Constants.Theme.Dark -> Constants.Theme.System
-                                        Constants.Theme.System -> Constants.Theme.Light
-                                    }
-                                    viewModel.setAppTheme(newMode)
-                                    AppCompatDelegate.setDefaultNightMode(
-                                        when (newMode) {
-                                            Constants.Theme.Light -> AppCompatDelegate.MODE_NIGHT_NO
-                                            Constants.Theme.Dark -> AppCompatDelegate.MODE_NIGHT_YES
-                                            Constants.Theme.System -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                                        }
-                                    )
-                                }
-                            }
-                        },
-                        onModeToggle = { showConfigSheet() },
-                        onSelect = { selectAction.value?.invoke() }
-                    )
-                }
         ) {
             val currentPresetName = ThemePresets.PRESETS.getOrNull(currentIndexState.intValue)?.name?.uppercase() ?: ""
             SettingsComposable.PageHeader(
@@ -735,10 +679,10 @@ fun ThemePresetsPage(
                 onClick = onBackClick,
                 showStatusBar = showStatusBar,
                 titleFontSize = titleFontSize,
-                backHighlighted = isDpadMode && focusZone.value == ThemePresetFocusZone.HEADER && headerIndex.intValue == 0,
+                backHighlighted = false,
                 pageIndicator = {
-                    val monoHighlighted = isDpadMode && focusZone.value == ThemePresetFocusZone.HEADER && headerIndex.intValue == 1
-                    val modeHighlighted = isDpadMode && focusZone.value == ThemePresetFocusZone.HEADER && headerIndex.intValue == 2
+                    val monoHighlighted = false
+                    val modeHighlighted = false
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.height(IntrinsicSize.Min)
@@ -822,9 +766,6 @@ fun ThemePresetsPage(
                 onConfigClick = { showConfigSheet() },
                 einkMode = einkMode.value,
                 currentIndexState = currentIndexState,
-                focusZone = focusZone,
-                bottomRowIndex = bottomRowIndex,
-                isDpadMode = isDpadMode,
                 selectAction = selectAction,
                 applyColors = applyColors,
                 applyFont = applyFont,

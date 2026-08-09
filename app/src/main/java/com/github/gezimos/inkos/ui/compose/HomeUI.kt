@@ -49,7 +49,9 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Edit
@@ -67,6 +69,7 @@ import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.SwipeVertical
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.LightMode
@@ -161,14 +164,8 @@ import kotlin.math.sin
 fun HomeUI(
     state: HomeUiRenderState,
     callbacks: HomeUiCallbacks,
-    selectedAppId: Int? = null,
-    showDpadMode: Boolean = false,
-    dpadActivatedAppId: Int? = null,
-    onDpadActivatedHandled: (Int) -> Unit = {},
     onHomeAppsBoundsChanged: (Rect?) -> Unit = {},
     onBottomWidgetHeightChanged: (Int) -> Unit = {},
-    focusZone: FocusZone? = null,
-    selectedMediaButton: Int? = null,
     showEditMode: Boolean = false,
     navBarPaddingDp: Dp = 0.dp,
     isPreview: Boolean = false
@@ -241,59 +238,54 @@ fun HomeUI(
                 }
         )
         
-        // First-launch tooltip sequence: pinch → swipe pages → long swipe drawer.
+        // First-launch tooltip sequence: swipe pages → long swipe drawer.
+        // (Settings used to need a "pinch to open" tooltip here too, but that
+        // gesture is gone -- the corner gear icon is visible on its own and
+        // doesn't need explaining.)
         // Single persistent bubble; Next advances through steps, X / outside skips remaining.
         if (!isPreview) {
-            val tooltipKeyPinch = "tooltip_home_pinch_settings"
             val tooltipKeySwipePages = "tooltip_home_swipe_pages"
             val tooltipKeyLongSwipeDrawer = "tooltip_home_long_swipe_drawer"
             var tooltipStep by remember { mutableIntStateOf(-1) }
             LaunchedEffect(prefs.firstOpen) {
                 tooltipStep = if (prefs.firstOpen) 0
                 else when {
-                    !prefs.isTooltipShown(tooltipKeyPinch) -> 1
-                    !prefs.isTooltipShown(tooltipKeySwipePages) -> 2
-                    !prefs.isTooltipShown(tooltipKeyLongSwipeDrawer) -> 3
+                    !prefs.isTooltipShown(tooltipKeySwipePages) -> 1
+                    !prefs.isTooltipShown(tooltipKeyLongSwipeDrawer) -> 2
                     else -> 0
                 }
             }
-            if (tooltipStep in 1..3) {
+            if (tooltipStep in 1..2) {
                 val currentKey = when (tooltipStep) {
-                    1 -> tooltipKeyPinch
-                    2 -> tooltipKeySwipePages
+                    1 -> tooltipKeySwipePages
                     else -> tooltipKeyLongSwipeDrawer
                 }
-                val isLastStep = tooltipStep == 3
+                val isLastStep = tooltipStep == 2
                 TooltipBubble(
                     title = when (tooltipStep) {
-                        1 -> stringResource(R.string.settings_name)
-                        2 -> "Home Pages"
+                        1 -> "Home Pages"
                         else -> "App Drawer"
                     },
                     lines = when (tooltipStep) {
-                        1 -> listOf(stringResource(R.string.tooltip_pinch_settings))
-                        2 -> listOf("Swipe up/down to move between pages")
+                        1 -> listOf("Swipe up/down to move between pages")
                         else -> listOf("Long swipe up to open App Drawer")
                     },
                     icon = when (tooltipStep) {
-                        2 -> Icons.Rounded.SwipeVertical
-                        3 -> Icons.Rounded.ArrowUpward
-                        else -> null
+                        1 -> Icons.Rounded.SwipeVertical
+                        else -> Icons.Rounded.ArrowUpward
                     },
-                    animFrames = if (tooltipStep == 1) listOf(R.drawable.pinch1, R.drawable.pinch2) else emptyList(),
+                    animFrames = emptyList(),
                     alignment = Alignment.Center,
                     nextLabel = if (isLastStep) "Done" else "Next",
                     onNext = {
                         prefs.markTooltipShown(currentKey)
                         tooltipStep = when {
-                            !prefs.isTooltipShown(tooltipKeyPinch) -> 1
-                            !prefs.isTooltipShown(tooltipKeySwipePages) -> 2
-                            !prefs.isTooltipShown(tooltipKeyLongSwipeDrawer) -> 3
+                            !prefs.isTooltipShown(tooltipKeySwipePages) -> 1
+                            !prefs.isTooltipShown(tooltipKeyLongSwipeDrawer) -> 2
                             else -> 0
                         }
                     },
                     onDismiss = {
-                        prefs.markTooltipShown(tooltipKeyPinch)
                         prefs.markTooltipShown(tooltipKeySwipePages)
                         prefs.markTooltipShown(tooltipKeyLongSwipeDrawer)
                         tooltipStep = 0
@@ -324,8 +316,6 @@ fun HomeUI(
                 onBatteryClick = callbacks.onBatteryClick,
                 onNotificationCountClick = callbacks.onNotificationCountClick,
                 modifier = Modifier,
-                isClockFocused = showDpadMode && focusZone == FocusZone.CLOCK,
-                isDateFocused = showDpadMode && focusZone == FocusZone.DATE,
                 showTextIslands = state.textIslands,
                 showEditMode = showEditMode
             )
@@ -341,10 +331,6 @@ fun HomeUI(
             HomeAppsPager(
                 state = state,
                 callbacks = callbacks,
-                selectedAppId = selectedAppId,
-                showDpadMode = showDpadMode,
-                dpadActivatedAppId = dpadActivatedAppId,
-                onDpadActivatedHandled = onDpadActivatedHandled,
                 modifier = Modifier
                     .fillMaxWidth()
                     .offset(y = state.homeAppsYOffset.dp)
@@ -389,7 +375,6 @@ fun HomeUI(
                 HomeMediaWidget(
                     state = state,
                     callbacks = callbacks,
-                    selectedButtonIndex = if (showDpadMode && focusZone == FocusZone.MEDIA_WIDGET) selectedMediaButton else null,
                     showTextIslands = state.textIslands,
                     textIslandsInverted = state.textIslandsInverted,
                     textIslandsShape = state.textIslandsShape,
@@ -404,7 +389,6 @@ fun HomeUI(
                         QuoteBlock(
                             state = state,
                             onClick = callbacks.onBottomWidgetClick,
-                            isFocused = showDpadMode && focusZone == FocusZone.QUOTE,
                             showTextIslands = state.textIslands,
                             showEditMode = showEditMode
                         )
@@ -417,7 +401,6 @@ fun HomeUI(
                         callbacks = callbacks,
                         onBottomWidgetClick = callbacks.onBottomWidgetClick,
                         isEditMode = showEditMode,
-                        isFocused = showDpadMode && focusZone == FocusZone.QUOTE,
                         showTextIslands = state.textIslands
                     )
                 }
@@ -443,7 +426,6 @@ fun HomeUI(
                         onRightClick = callbacks.onShortcutRightClick,
                         onBottomWidgetClick = callbacks.onBottomWidgetClick,
                         isEditMode = showEditMode,
-                        isFocused = showDpadMode && focusZone == FocusZone.QUOTE,
                         showTextIslands = state.textIslands
                     )
                 }
@@ -452,7 +434,6 @@ fun HomeUI(
                     TotalUsageBlock(
                         state = state,
                         onClick = callbacks.onBottomWidgetClick,
-                        isFocused = showDpadMode && focusZone == FocusZone.QUOTE,
                         showTextIslands = state.textIslands,
                         showEditMode = showEditMode
                     )
@@ -480,7 +461,6 @@ fun HomeUI(
                         QuoteBlock(
                             state = state,
                             onClick = callbacks.onBottomWidgetClick,
-                            isFocused = showDpadMode && focusZone == FocusZone.QUOTE,
                             showTextIslands = state.textIslands,
                             showEditMode = showEditMode
                         )
@@ -526,6 +506,94 @@ fun HomeUI(
             )
 
             EditModeOverlay()
+        }
+
+        // Persistent Quick Menu (Settings) icon, replacing the old pinch gesture
+        // with a visible, always-reachable tap target in a user-chosen corner.
+        if (!isPreview) {
+            val quickMenuAlign = when (state.quickMenuIconPosition) {
+                0 -> Alignment.TopStart
+                1 -> Alignment.TopEnd
+                2 -> Alignment.BottomStart
+                4 -> Alignment.BottomCenter
+                else -> Alignment.BottomEnd
+            }
+            Box(
+                modifier = Modifier
+                    .align(quickMenuAlign)
+                    .padding(4.dp)
+                    .size(48.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { callbacks.onQuickMenuClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Settings,
+                    contentDescription = stringResource(R.string.settings_name),
+                    tint = Theme.colors.text,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        // Persistent App Drawer icon, a visible always-reachable tap target
+        // in a user-chosen bottom corner (mirrors the Quick Menu icon above).
+        // Position 3 = Hidden, for users who don't want this icon at all.
+        if (!isPreview && state.appDrawerIconPosition != 3) {
+            val appDrawerAlign = when (state.appDrawerIconPosition) {
+                0 -> Alignment.BottomStart
+                2 -> Alignment.BottomCenter
+                else -> Alignment.BottomEnd
+            }
+            Box(
+                modifier = Modifier
+                    .align(appDrawerAlign)
+                    .padding(4.dp)
+                    .size(48.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { callbacks.onAppDrawerClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Apps,
+                    contentDescription = stringResource(R.string.app_drawer),
+                    tint = Theme.colors.text,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        // Persistent Search icon, a visible always-reachable tap target
+        // in a user-chosen bottom position (mirrors the icons above).
+        // Position 3 = Hidden, for users who don't want this icon at all.
+        if (!isPreview && state.searchIconPosition != 3) {
+            val searchAlign = when (state.searchIconPosition) {
+                0 -> Alignment.BottomStart
+                1 -> Alignment.BottomEnd
+                else -> Alignment.BottomCenter
+            }
+            Box(
+                modifier = Modifier
+                    .align(searchAlign)
+                    .padding(4.dp)
+                    .size(48.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { callbacks.onSearchIconClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = stringResource(R.string.search),
+                    tint = Theme.colors.text,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
@@ -1036,11 +1104,12 @@ private fun HomeHeader(
     onBatteryClick: () -> Unit,
     onNotificationCountClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isClockFocused: Boolean = false,
-    isDateFocused: Boolean = false,
     showTextIslands: Boolean = false,
     showEditMode: Boolean = false
 ) {
+    // Physical d-pad focus is not applicable on the touch-only Mudita Kompakt.
+    val isClockFocused = false
+    val isDateFocused = false
     val context = LocalContext.current
     val clockTypeface = remember(state.clockFont, state.clockCustomFontPath) {
         state.clockFont.getFont(context, state.clockCustomFontPath)
@@ -2961,11 +3030,7 @@ private fun BottomWidgetEditModeTapTarget(state: HomeUiRenderState, onClick: () 
 private fun HomeAppsPager(
     modifier: Modifier = Modifier,
     state: HomeUiRenderState,
-    callbacks: HomeUiCallbacks,
-    selectedAppId: Int? = null,
-    showDpadMode: Boolean = false,
-    dpadActivatedAppId: Int? = null,
-    onDpadActivatedHandled: (Int) -> Unit = {}
+    callbacks: HomeUiCallbacks
 ) {
     val screenScale = rememberScreenScale()
     val scaledAppTextSize = state.appTextSize * screenScale
@@ -3071,10 +3136,6 @@ private fun HomeAppsPager(
                 app = app,
                 state = state,
                 gravity = textAlign,
-                isSelected = (selectedAppId != null && app.id == selectedAppId),
-                showDpadMode = showDpadMode,
-                dpadActivatedAppId = dpadActivatedAppId,
-                onDpadActivatedHandled = onDpadActivatedHandled,
                 onClick = { callbacks.onAppClick(app) },
                 onLongClick = { callbacks.onAppLongClick(app) },
                 showTextIslands = state.textIslands,
@@ -3630,10 +3691,6 @@ private fun HomeAppButton(
     app: HomeAppUiState,
     state: HomeUiRenderState,
     gravity: Int,
-    isSelected: Boolean = false,
-    showDpadMode: Boolean = false,
-    dpadActivatedAppId: Int? = null,
-    onDpadActivatedHandled: (Int) -> Unit = {},
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     showTextIslands: Boolean = false,
@@ -3647,13 +3704,14 @@ private fun HomeAppButton(
     focusBackgroundColor: Color,
     focusTextColor: Color
 ) {
+    // Physical d-pad focus/selection is not applicable on the touch-only Mudita Kompakt.
+    val isSelected = false
+    val showDpadMode = false
     val screenScale = rememberScreenScale()
     val scaledAppTextSize = state.appTextSize * screenScale
     val scaledIconTextSize = scaledAppTextSize
     val scaledNotifTextSize = state.notificationTextSize * screenScale
     val highlightPaddingPx = with(LocalDensity.current) { 8.dp.toPx() }
-    val isDpadActivated = dpadActivatedAppId == app.id
-    val pulseAlpha = remember { androidx.compose.animation.core.Animatable(0f) }
     val placeholderLabel = stringResource(id = R.string.select_app)
     val isOtherProfile = app.user != null && app.user != android.os.Process.myUserHandle()
     val rawLabel = (app.label.ifBlank { placeholderLabel }).let { if (isOtherProfile) "$it^" else it }
@@ -3706,7 +3764,6 @@ private fun HomeAppButton(
     val modeIsFullBleed = remember(state.iconSourceMode) { IconShapeUtility.isFullBleedMode(state.iconSourceMode) }
     val modeIsInkOs = remember(state.iconSourceMode) { IconShapeUtility.isInkOsMode(state.iconSourceMode) }
     val modeIsTinted = remember(state.iconSourceMode) { IconShapeUtility.isTintedMode(state.iconSourceMode) }
-    val pulseColor = Theme.colors.text
 
     val isFocused = showDpadMode && isSelected
     val labelColor = when {
@@ -3787,15 +3844,6 @@ private fun HomeAppButton(
             ),
         contentAlignment = boxContentAlignment
     ) {
-        if (isDpadActivated) {
-            LaunchedEffect(app.id) {
-                try {
-                    pulseAlpha.snapTo(0.9f)
-                    pulseAlpha.animateTo(0f, animationSpec = tween(durationMillis = 220))
-                } catch (_: Exception) {}
-                onDpadActivatedHandled(app.id)
-            }
-        }
 
         // Otherwise, show normal layout (icon + app name)
         if (subtitle != null) {
@@ -4177,28 +4225,6 @@ private fun HomeAppButton(
                 }
             }
         }
-
-        if (isDpadActivated) {
-            Box(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .graphicsLayer(clip = false)
-                    .drawBehind {
-                        val alpha = pulseAlpha.value.coerceIn(0f, 1f)
-                        if (alpha > 0f) {
-                            val pad = highlightPaddingPx
-                            val pulseWidth = size.width + (pad * 2)
-                            val corner = CornerRadius(size.height / 2f, size.height / 2f)
-                            drawRoundRect(
-                                color = pulseColor.copy(alpha = alpha),
-                                topLeft = Offset(-pad, 0f),
-                                size = Size(pulseWidth.coerceAtLeast(0f), size.height),
-                                cornerRadius = corner
-                            )
-                        }
-                    }
-            ) {}
-        }
     }
 }
 
@@ -4305,6 +4331,9 @@ data class HomeUiRenderState(
     val clockAlignment: Int = 0,
     val dateAlignment: Int = 0,
     val quoteAlignment: Int = 0,
+    val quickMenuIconPosition: Int = 3,
+    val appDrawerIconPosition: Int = 0,
+    val searchIconPosition: Int = 2,
     val homeAppsYOffset: Int,
     val maxHomeAppsYOffset: Int = Constants.MAX_HOME_APPS_Y_OFFSET,
 
@@ -4397,6 +4426,9 @@ data class HomeUiCallbacks(
     val onPageDelta: (Int) -> Unit,
     val onRootLongPress: () -> Unit,
     val onBackgroundClick: () -> Unit = {},
+    val onQuickMenuClick: () -> Unit = {},
+    val onAppDrawerClick: () -> Unit = {},
+    val onSearchIconClick: () -> Unit = {},
     val onAndroidWidgetHeightChange: (Int) -> Unit = {},
     val onAndroidWidgetMarginStartChange: (Int) -> Unit = {},
     val onAndroidWidgetMarginEndChange: (Int) -> Unit = {},

@@ -1072,8 +1072,8 @@ fun GestureActionPickerSheet(
     }
 
     val gestureTabTitle = when (selectedTabIndex.intValue) {
-        0 -> if (showOpenAppTab) context.getString(R.string.open_app) else "inkOS"
-        1 -> if (showOpenAppTab) "inkOS" else "Android"
+        0 -> if (showOpenAppTab) context.getString(R.string.open_app) else "ErdCarbon"
+        1 -> if (showOpenAppTab) "ErdCarbon" else "Android"
         2 -> "Android"
         else -> title
     }
@@ -1610,7 +1610,7 @@ fun TabbedShortcutsSheet(
     }
 
     val tabTitle = when (selectedTabIndex.intValue) {
-        1 -> "inkOS"
+        1 -> "ErdCarbon"
         2 -> "Android"
         3 -> context.getString(R.string.shortcut_tab_pinned)
         else -> title
@@ -2289,7 +2289,7 @@ fun SetWallpaperSheet(
 
 @Composable
 fun InkosWallpaperInfoSheet(onDismiss: () -> Unit) {
-    SheetTitle("What is inkOS Wallpaper?")
+    SheetTitle("What is ErdCarbon Wallpaper?")
     Box(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.inkos_wallpaper_explanation),

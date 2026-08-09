@@ -10,8 +10,6 @@ object KeyMapperHelper {
         object MoveSelectionDown : HomeKeyAction()
         object PageUp : HomeKeyAction()
         object PageDown : HomeKeyAction()
-        object SwipeLeft : HomeKeyAction()
-        object SwipeRight : HomeKeyAction()
         object LongPressSelected : HomeKeyAction()
         object OpenQuickMenu : HomeKeyAction()
         object ClickClock : HomeKeyAction()
@@ -39,9 +37,6 @@ object KeyMapperHelper {
             GestureKeyCodes.DATE -> if (prefs.clickDateAction != Action.Disabled) HomeKeyAction.ClickDate else HomeKeyAction.None
             GestureKeyCodes.QUOTE -> if (prefs.quoteAction != Action.Disabled) HomeKeyAction.ClickQuote else HomeKeyAction.None
             GestureKeyCodes.DOUBLETAP -> if (prefs.doubleTapAction != Action.Disabled) HomeKeyAction.DoubleTap else HomeKeyAction.None
-
-            KeyEvent.KEYCODE_DPAD_LEFT -> if (prefs.swipeRightAction != Action.Disabled) HomeKeyAction.SwipeRight else HomeKeyAction.None
-            KeyEvent.KEYCODE_DPAD_RIGHT -> if (prefs.swipeLeftAction != Action.Disabled) HomeKeyAction.SwipeLeft else HomeKeyAction.None
 
             KeyEvent.KEYCODE_9 -> {
                 if (event.isLongPress) HomeKeyAction.OpenQuickMenu else HomeKeyAction.None
